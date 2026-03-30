@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOLER PRO</title>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-screen" id="login-screen">
+<div class="login-box">
+<div class="login-logo">🖌️</div>
+<div class="login-title">MOLER PRO<span>Molarsko poslovanje</span></div>
+<div class="login-tabs">
+<button class="login-tab active" onclick="showLoginTab('login')">Prijava</button>
+<button class="login-tab" onclick="showLoginTab('register')">Registracija</button>
+</div>
+<form id="login-form" class="login-form active" onsubmit="handleLogin(event)">
+<label>Email</label><input type="email" id="login-email" required placeholder="vas@email.com">
+<label>Lozinka</label><input type="password" id="login-password" required>
+<button type="submit" class="login-btn">Prijavi se</button>
+<div class="login-error" id="login-error"></div>
+</form>
+<form id="register-form" class="login-form" onsubmit="handleRegister(event)">
+<label>Email</label><input type="email" id="reg-email" required>
+<label>Lozinka</label><input type="password" id="reg-password" required>
+<label>Ponovi lozinku</label><input type="password" id="reg-password2" required>
+<button type="submit" class="login-btn">Registruj se</button>
+<div class="login-error" id="reg-error"></div>
+</form>
+</div>
+</div>
+<div id="main-app">
+<nav class="nav">
+<div class="nav-brand">🖌️ MOLER PRO</div>
+<button onclick="showPage('dashboard')" class="active" data-page="dashboard">Dashboard</button>
+<button onclick="showPage('projekti')" data-page="projekti">Projekti</button>
+<button onclick="showPage('klijenti')" data-page="klijenti">Klijenti</button>
+<button onclick="showPage('rashodi')" data-page="rashodi">Rashodi</button>
+<button onclick="showPage('materijal')" data-page="materijal">Materijal</button>
+<button onclick="showPage('postavke')" data-page="postavke">Postavke</button>
+<div class="nav-right">
+<button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+<span class="sync-status offline" id="sync-status">Offline</span>
+<span class="user-info" id="user-display"></span>
+<button class="btn btn-red btn-sm btn-logout" onclick="handleLogout()">Izlaz</button>
+</div>
+</nav>
+<div class="page active" id="pg-dashboard">
+<h2 class="page-title">Dashboard</h2>
+<div class="dashboard-grid">
+<div class="stat-card"><div class="stat-value" id="stat-prihod">0 KM</div><div class="stat-label">PRIHOD</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-rashod">0 KM</div><div class="stat-label">RASHODI</div></div>
+<div class="stat-card green"><div class="stat-value" id="stat-profit">0 KM</div><div class="stat-label">PROFIT</div></div>
+<div class="stat-card orange"><div class="stat-value" id="stat-neplaceno">0 KM</div><div class="stat-label">NEPLACENO</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-projekata">0</div><div class="stat-label">PROJEKATA</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-aktivnih">0</div><div class="stat-label">AKTIVNIH</div></div>
+</div>
+<div class="chart-container"><h3>Prihodi i Rashodi po mjesecima</h3><canvas id="revenue-chart"></canvas></div>
+</div>
+<div class="page" id="pg-projekti">
+<h2 class="page-title">Projekti</h2>
+<div class="search-bar">
+<input type="text" id="proj-search" placeholder="Pretraga..." oninput="renderProjekti()">
+<div class="year-tabs" id="year-tabs"></div>
+</div>
+<button class="btn btn-accent" onclick="openProjektModal()">+ Novi projekt</button>
+<div class="table-wrap">
+<table><thead><tr><th>Datum</th><th>Klijent</th><th>Adresa</th><th>m2</th><th>Cijena</th><th>Status</th><th>Placeno</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-projekti"></tbody></table>
+</div>
+</div>
+<div class="page" id="pg-klijenti">
+<h2 class="page-title">Klijenti</h2>
+<div class="search-bar"><input type="text" id="klijent-search" placeholder="Pretraga..." oninput="renderKlijenti()"></div>
+<button class="btn btn-accent" onclick="openKlijentModal()">+ Novi klijent</button>
+<div class="table-wrap">
+<table><thead><tr><th>Ime</th><th>Telefon</th><th>Adresa</th><th>Projekata</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-klijenti"></tbody></table>
+</div>
+</div>
+<div class="page" id="pg-rashodi">
+<h2 class="page-title">Rashodi</h2>
+<button class="btn btn-accent" onclick="openRashodModal()">+ Novi rashod</button>
+<div class="table-wrap">
+<table><thead><tr><th>Datum</th><th>Kategorija</th><th>Opis</th><th>Iznos</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-rashodi"></tbody></table>
+</div>
+</div>
+<div class="page" id="pg-materijal">
+<h2 class="page-title">Materijal</h2>
+<button class="btn btn-accent" onclick="openMaterijalModal()">+ Novi materijal</button>
+<div class="table-wrap">
+<table><thead><tr><th>Naziv</th><th>Kategorija</th><th>Kolicina</th><th>Min.</th><th>Status</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-materijal"></tbody></table>
+</div>
+</div>
+<div class="page" id="pg-postavke">
+<h2 class="page-title">Postavke</h2>
+<div class="table-wrap">
+<h3>Export/Import podataka</h3>
+<p style="margin:16px 0;color:var(--text2)">Backup vasih podataka</p>
+<button class="btn btn-accent" onclick="exportData()">Export JSON</button>
+<input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+<button class="btn btn-outline" onclick="document.getElementById('import-file').click()">Import JSON</button>
+</div>
+</div>
+</div>
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+<div class="modal-content" id="modal-content"></div>
+</div>
+
+
+<script src="app.js"></script>
+</body>
+</html>
