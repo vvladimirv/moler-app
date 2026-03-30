@@ -282,13 +282,13 @@ updateSyncStatus();
 db.ref('moler/'+currentUser.uid).once('value').then(function(snap){
 if(snap.exists()){var d=snap.val();cache.settings=d.settings||{};cache.projekti=d.projekti||[];cache.klijenti=d.klijenti||[];cache.rashodi=d.rashodi||[];cache.materijal=d.materijal||[]}
 else{cache={settings:{},projekti:[],klijenti:[],rashodi:[],materijal:[]}}
-renderYearTabs();renderDashboard()}).catch(function(e){console.log('Load error:',e)})
+renderYearTabs();renderDashboard()}).catch(function(e){alert('Load error: '+e.message);console.log('Load error:',e)})
 
 async function saveUserData(){
 if(!currentUser)return;
 localStorage.setItem('moler-cache',JSON.stringify(cache));
 if(navigator.onLine){
-db.ref('moler/'+currentUser.uid).set({settings:cache.settings,projekti:cache.projekti,klijenti:cache.klijenti,rashodi:cache.rashodi,materijal:cache.materijal,updated:Date.now()}).then(function(){}).catch(function(e){console.log('Save error:',e)})
+db.ref('moler/'+currentUser.uid).set({settings:cache.settings,projekti:cache.projekti,klijenti:cache.klijenti,rashodi:cache.rashodi,materijal:cache.materijal,updated:Date.now()}).then(function(){}).catch(function(e){alert('Save error: '+e.message);console.log('Save error:',e)})
 }
 showSave()}
 
