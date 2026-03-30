@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOLER PRO</title>
+<style>
+:root{--bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#252525;--accent:#42a5f5;--accent2:#1565c0;--text:#e0e0e0;--text2:#999;--green:#4caf50;--red:#e53935;--orange:#ff9800}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* LOGIN */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{background:var(--bg2);border-radius:16px;padding:32px;max-width:400px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.5)}
+.login-logo{font-size:2.5em;text-align:center;margin-bottom:8px}
+.login-title{font-size:1.5em;font-weight:700;color:var(--accent);text-align:center;margin-bottom:24px}
+.login-title span{display:block;font-size:.5em;color:var(--text2);font-weight:400;margin-top:4px}
+.login-tabs{display:flex;margin-bottom:20px;border-radius:8px;overflow:hidden;background:var(--bg3)}
+.login-tab{flex:1;padding:12px;border:none;background:none;color:var(--text2);cursor:pointer;font-weight:600}
+.login-tab.active{background:var(--accent);color:#fff}
+.login-form{display:none}
+.login-form.active{display:block}
+.login-form label{display:block;font-size:.8em;color:var(--text2);margin-bottom:4px;margin-top:12px}
+.login-form input{width:100%;padding:12px;background:var(--bg3);border:1px solid #444;border-radius:8px;color:var(--text);font-size:1em}
+.login-btn{width:100%;padding:14px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:1em;font-weight:600;cursor:pointer;margin-top:20px}
+.login-btn:hover{background:var(--accent2)}
+.login-error{background:#b71c1c;color:#ef9a9a;padding:10px;border-radius:8px;margin-top:12px;font-size:.9em;display:none}
+
+/* NAV */
+.nav{display:flex;align-items:center;padding:12px 20px;background:var(--bg2);border-bottom:1px solid #333;flex-wrap:wrap;gap:8px}
+.nav-brand{font-size:1.2em;font-weight:700;color:var(--accent);margin-right:20px}
+.nav button{padding:8px 16px;border:none;background:none;color:var(--text2);cursor:pointer;font-size:.9em;border-radius:6px}
+.nav button:hover{background:var(--bg3)}
+.nav button.active{background:var(--accent);color:#fff}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.user-info{color:var(--text2);font-size:.9em}
+.btn-logout{background:var(--red)!important;color:#fff!important}
+
+/* MAIN */
+#main-app{display:none;min-height:calc(100vh - 60px)}
+.page{display:none;padding:20px}
+.page.active{display:block}
+.page-title{font-size:1.5em;margin-bottom:20px;color:var(--accent)}
+
+/* DASHBOARD */
+.dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--bg2);border-radius:12px;padding:20px;text-align:center}
+.stat-value{font-size:2em;font-weight:700;color:var(--accent)}
+.stat-label{color:var(--text2);font-size:.9em;margin-top:4px}
+.stat-card.green .stat-value{color:var(--green)}
+.stat-card.red .stat-value{color:var(--red)}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;background:var(--bg2);border-radius:12px;padding:16px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;text-align:left;border-bottom:1px solid #333}
+th{color:var(--text2);font-weight:600;font-size:.85em}
+tr:hover{background:var(--bg3)}
+.empty{text-align:center;color:var(--text2);padding:40px}
+
+/* BUTTONS */
+.btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:.9em;font-weight:600}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-outline{background:none;border:1px solid var(--accent);color:var(--accent)}
+.btn-red{background:var(--red);color:#fff}
+.btn-sm{padding:6px 12px;font-size:.8em}
+.btn:hover{opacity:.9}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px}
+.form-grid input,.form-grid select,.form-grid textarea{width:100%;padding:12px;background:var(--bg3);border:1px solid #444;border-radius:8px;color:var(--text);font-size:1em}
+.form-grid label{display:block;font-size:.8em;color:var(--text2);margin-bottom:4px}
+
+/* MODAL */
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal.show{display:flex}
+.modal-content{background:var(--bg2);border-radius:16px;padding:24px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto}
+.modal-content h3{margin-bottom:16px;color:var(--accent)}
+.modal-actions{display:flex;gap:12px;margin-top:20px;justify-content:flex-end}
+
+/* BADGE */
+.badge{padding:4px 8px;border-radius:4px;font-size:.75em;font-weight:600}
+.badge-blue{background:#1565c0;color:#fff}
+.badge-yellow{background:#f9a825;color:#000}
+.badge-green{background:var(--green);color:#fff}
+.badge-red{background:var(--red);color:#fff}
+
+/* SYNC */
+.sync-status{font-size:.8em;padding:4px 8px;border-radius:4px}
+.sync-status.online{background:var(--green);color:#fff}
+.sync-status.offline{background:var(--red);color:#fff}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+.nav{flex-wrap:wrap}
+.nav button{padding:6px 10px;font-size:.8em}
+.dashboard-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+<div class="login-box">
+<div class="login-logo">🖌️</div>
+<div class="login-title">MOLER PRO<span>Molarsko poslovanje</span></div>
+<div class="login-tabs">
+<button class="login-tab active" onclick="showLoginTab('login')">Prijava</button>
+<button class="login-tab" onclick="showLoginTab('register')">Registracija</button>
+</div>
+<form id="login-form" class="login-form active" onsubmit="handleLogin(event)">
+<label>Email</label><input type="email" id="login-email" required placeholder="vas@email.com">
+<label>Lozinka</label><input type="password" id="login-password" required placeholder="••••••••">
+<button type="submit" class="login-btn">Prijavi se</button>
+<div class="login-error" id="login-error"></div>
+</form>
+<form id="register-form" class="login-form" onsubmit="handleRegister(event)">
+<label>Email</label><input type="email" id="reg-email" required placeholder="vas@email.com">
+<label>Lozinka</label><input type="password" id="reg-password" required placeholder="••••••••">
+<label>Ponovi lozinku</label><input type="password" id="reg-password2" required placeholder="••••••••">
+<button type="submit" class="login-btn">Registruj se</button>
+<div class="login-error" id="reg-error"></div>
+<div class="login-success" id="reg-success"></div>
+</form>
+</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app">
+<nav class="nav">
+<div class="nav-brand">🖌️ MOLER PRO</div>
+<button onclick="showPage('dashboard')" class="active" data-page="dashboard">Dashboard</button>
+<button onclick="showPage('projekti')" data-page="projekti">Projekti</button>
+<button onclick="showPage('klijenti')" data-page="klijenti">Klijenti</button>
+<button onclick="showPage('rashodi')" data-page="rashodi">Rashodi</button>
+<button onclick="showPage('materijal')" data-page="materijal">Materijal</button>
+<button onclick="showPage('postavke')" data-page="postavke">Postavke</button>
+<div class="nav-right">
+<span class="sync-status offline" id="sync-status">Offline</span>
+<span class="user-info" id="user-display"></span>
+<button class="btn btn-red btn-sm btn-logout" onclick="handleLogout()">Izlaz</button>
+</div>
+</nav>
+
+<!-- Dashboard -->
+<div class="page active" id="pg-dashboard">
+<h2 class="page-title">Dashboard</h2>
+<div class="dashboard-grid">
+<div class="stat-card"><div class="stat-value" id="stat-prihod">0 KM</div><div class="stat-label">PRIHOD</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-rashod">0 KM</div><div class="stat-label">RASHODI</div></div>
+<div class="stat-card green"><div class="stat-value" id="stat-profit">0 KM</div><div class="stat-label">PROFIT</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-projekata">0</div><div class="stat-label">PROJEKATA</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-aktivnih">0</div><div class="stat-label">AKTIVNIH</div></div>
+</div>
+</div>
+
+<!-- Projekti -->
+<div class="page" id="pg-projekti">
+<h2 class="page-title">Projekti</h2>
+<button class="btn btn-accent" onclick="openProjektModal()">+ Novi projekt</button>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Datum</th><th>Klijent</th><th>Adresa</th><th>m²</th><th>Cijena</th><th>Status</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-projekti"><tr><td colspan="7" class="empty">Nema projekata</td></tr></tbody>
+</table>
+</div>
+</div>
+
+<!-- Klijenti -->
+<div class="page" id="pg-klijenti">
+<h2 class="page-title">Klijenti</h2>
+<button class="btn btn-accent" onclick="openKlijentModal()">+ Novi klijent</button>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Ime</th><th>Telefon</th><th>Adresa</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-klijenti"><tr><td colspan="4" class="empty">Nema klijenata</td></tr></tbody>
+</table>
+</div>
+</div>
+
+<!-- Rashodi -->
+<div class="page" id="pg-rashodi">
+<h2 class="page-title">Rashodi</h2>
+<button class="btn btn-accent" onclick="openRashodModal()">+ Novi rashod</button>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Datum</th><th>Kategorija</th><th>Opis</th><th>Iznos</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-rashodi"><tr><td colspan="5" class="empty">Nema rashoda</td></tr></tbody>
+</table>
+</div>
+</div>
+
+<!-- Materijal -->
+<div class="page" id="pg-materijal">
+<h2 class="page-title">Materijal</h2>
+<button class="btn btn-accent" onclick="openMaterijalModal()">+ Novi materijal</button>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Naziv</th><th>Kategorija</th><th>Količina</th><th>Min.</th><th>Status</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-materijal"><tr><td colspan="6" class="empty">Nema materijala</td></tr></tbody>
+</table>
+</div>
+</div>
+
+<!-- Postavke -->
+<div class="page" id="pg-postavke">
+<h2 class="page-title">Postavke</h2>
+<div class="table-wrap">
+<h3>Export/Import podataka</h3>
+<p style="margin:16px 0;color:var(--text2)">Backup vaših podataka u JSON formatu</p>
+<button class="btn btn-accent" onclick="exportData()">📥 Export JSON</button>
+<input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+<button class="btn btn-outline" onclick="document.getElementById('import-file').click()">📤 Import JSON</button>
+</div>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+<div class="modal-content" id="modal-content"></div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script>
+var firebaseConfig={apiKey:"AIzaSyB3pm09C2J_kH5-XvNh2imKiwxh_OTrEEc",authDomain:"molerpro.firebaseapp.com",databaseURL:"https://molerpro-default-rtdb.europe-west1.firebasedatabase.app",projectId:"molerpro",storageBucket:"molerpro.firebasestorage.app",messagingSenderId:"997184398110",appId:"1:997184398110:web:1fd7260e71ba388dc45f0f"};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth();
+var db=firebase.database();
+
+var currentUser=null;
+var cache={settings:{},projekti:[],klijenti:[],rashodi:[],materijal:[]};
+
+/* AUTH */
+function showLoginTab(tab){
+  document.querySelectorAll('.login-tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.login-form').forEach(function(f){f.classList.remove('active')});
+  if(tab==='login'){
+    document.querySelector('.login-tab:first-child').classList.add('active');
+    document.getElementById('login-form').classList.add('active');
+  }else{
+    document.querySelector('.login-tab:last-child').classList.add('active');
+    document.getElementById('register-form').classList.add('active');
+  }
+}
+
+async function handleLogin(e){
+  e.preventDefault();
+  var email=document.getElementById('login-email').value;
+  var pass=document.getElementById('login-password').value;
+  try{
+    document.getElementById('login-error').style.display='none';
+    await auth.signInWithEmailAndPassword(email,pass);
+  }catch(err){
+    document.getElementById('login-error').textContent=err.message;
+    document.getElementById('login-error').style.display='block';
+  }
+}
+
+async function handleRegister(e){
+  e.preventDefault();
+  var email=document.getElementById('reg-email').value;
+  var pass=document.getElementById('reg-password').value;
+  var pass2=document.getElementById('reg-password2').value;
+  document.getElementById('reg-error').style.display='none';
+  document.getElementById('reg-success').style.display='none';
+  if(pass!==pass2){
+    document.getElementById('reg-error').textContent='Lozinke se ne poklapaju!';
+    document.getElementById('reg-error').style.display='block';
+    return;
+  }
+  try{
+    await auth.createUserWithEmailAndPassword(email,pass);
+    document.getElementById('reg-success').textContent='Nalog kreiran!';
+    document.getElementById('reg-success').style.display='block';
+  }catch(err){
+    document.getElementById('reg-error').textContent=err.message;
+    document.getElementById('reg-error').style.display='block';
+  }
+}
+
+function handleLogout(){
+  auth.signOut();
+}
+
+auth.onAuthStateChanged(function(user){
+  if(user){
+    currentUser=user;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('main-app').style.display='block';
+    document.getElementById('user-display').textContent=user.email;
+    loadUserData();
+  }else{
+    currentUser=null;
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('main-app').style.display='none';
+  }
+});
+
+/* DATA */
+function updateSyncStatus(){
+  var s=document.getElementById('sync-status');
+  if(navigator.onLine){
+    s.textContent='Online';
+    s.className='sync-status online';
+  }else{
+    s.textContent='Offline';
+    s.className='sync-status offline';
+  }
+}
+window.addEventListener('online',function(){updateSyncStatus();saveUserData();});
+window.addEventListener('offline',updateSyncStatus);
+
+function loadUserData(){
+  if(!currentUser)return;
+  updateSyncStatus();
+  db.ref('moler/'+currentUser.uid).once('value',function(snap){
+    if(snap.exists()){
+      var d=snap.val();
+      cache.settings=d.settings||{};
+      cache.projekti=d.projekti||[];
+      cache.klijenti=d.klijenti||[];
+      cache.rashodi=d.rashodi||[];
+      cache.materijal=d.materijal||[];
+    }else{
+      cache={settings:{},projekti:[],klijenti:[],rashodi:[],materijal:[]};
+    }
+    renderDashboard();
+  },function(e){
+    console.log('Load error:',e);
+  });
+}
+
+function saveUserData(){
+  if(!currentUser)return;
+  localStorage.setItem('moler-cache',JSON.stringify(cache));
+  if(navigator.onLine){
+    db.ref('moler/'+currentUser.uid).set({
+      settings:cache.settings,
+      projekti:cache.projekti,
+      klijenti:cache.klijenti,
+      rashodi:cache.rashodi,
+      materijal:cache.materijal,
+      updated:Date.now()
+    },function(e){
+      if(e)console.log('Save error:',e);
+    });
+  }
+}
+
+/* HELPERS */
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function km(n){return(n||0).toLocaleString('de-DE',{minimumFractionDigits:2})+' KM';}
+function fd(d){return d?new Date(d).toLocaleDateString('bs-BA'):'';}
+function v(id){return document.getElementById(id)?document.getElementById(id).value:'';}
+function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+
+/* PAGES */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.getElementById('pg-'+id).classList.add('active');
+  document.querySelectorAll('.nav button[data-page]').forEach(function(b){
+    b.classList.toggle('active',b.dataset.page===id);
+  });
+  if(id==='dashboard')renderDashboard();
+  if(id==='projekti')renderProjekti();
+  if(id==='klijenti')renderKlijenti();
+  if(id==='rashodi')renderRashodi();
+  if(id==='materijal')renderMaterijal();
+}
+
+/* DASHBOARD */
+function renderDashboard(){
+  var prihod=cache.projekti.filter(function(p){return p.status==='Završen'}).reduce(function(s,p){return s+(p.ukupnaCijena||0)},0);
+  var rashod=cache.rashodi.reduce(function(s,r){return s+(r.iznos||0)},0);
+  var profit=prihod-rashod;
+  var aktivnih=cache.projekti.filter(function(p){return p.status==='U toku'}).length;
+  
+  document.getElementById('stat-prihod').textContent=km(prihod);
+  document.getElementById('stat-rashod').textContent=km(rashod);
+  document.getElementById('stat-profit').textContent=km(profit);
+  document.getElementById('stat-projekata').textContent=cache.projekti.length;
+  document.getElementById('stat-aktivnih').textContent=aktivnih;
+}
+
+/* PROJEKTI */
+function renderProjekti(){
+  var list=cache.projekti.sort(function(a,b){return new Date(b.datum)-new Date(a.datum)});
+  var sb={'Ponuda':'badge-blue','U toku':'badge-yellow','Završen':'badge-green','Otkazan':'badge-red'};
+  document.getElementById('tbl-projekti').innerHTML=list.length?list.map(function(p){
+    return'<tr><td>'+fd(p.datum)+'</td><td><b>'+esc(p.klijent)+'</b></td><td>'+esc(p.adresa||'')+'</td><td>'+(p.m2||'-')+'</td><td>'+km(p.ukupnaCijena)+'</td><td><span class="badge '+sb[p.status]+'">'+p.status+'</span></td><td><button class="btn btn-red btn-sm" onclick="delItem(\'projekti\',\''+p.id+'\')">✕</button></td></tr>';
+  }).join(''):'<tr><td colspan="7" class="empty">Nema projekata</td></tr>';
+}
+
+function openProjektModal(){
+  var c=document.getElementById('modal-content');
+  c.innerHTML='<h3>Novi projekt</h3>'+
+    '<div class="form-grid">'+
+    '<div><label>Datum</label><input type="date" id="p-datum" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
+    '<div><label>Klijent</label><input id="p-klijent" placeholder="Ime klijenta"></div>'+
+    '<div><label>Adresa</label><input id="p-adresa" placeholder="Adresa"></div>'+
+    '<div><label>m²</label><input type="number" id="p-m2" placeholder="0"></div>'+
+    '<div><label>Cijena (KM)</label><input type="number" step="0.01" id="p-cijena" placeholder="0.00"></div>'+
+    '<div><label>Status</label><select id="p-status"><option>Ponuda</option><option>U toku</option><option>Završen</option><option>Otkazan</option></select></div>'+
+    '</div>'+
+    '<div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Otkaži</button><button class="btn btn-accent" onclick="saveProjekt()">Sačuvaj</button></div>';
+  document.getElementById('modal').classList.add('show');
+}
+
+async function saveProjekt(){
+  cache.projekti.push({
+    id:uid(),
+    datum:v('p-datum'),
+    klijent:v('p-klijent'),
+    adresa:v('p-adresa'),
+    m2:Number(v('p-m2'))||0,
+    ukupnaCijena:Number(v('p-cijena'))||0,
+    status:v('p-status')
+  });
+  await saveUserData();
+  closeModal();
+  renderProjekti();
+}
+
+/* KLIJENTI */
+function renderKlijenti(){
+  var list=cache.klijenti.sort(function(a,b){return a.ime.localeCompare(b.ime)});
+  document.getElementById('tbl-klijenti').innerHTML=list.length?list.map(function(k){
+    return'<tr><td><b>'+esc(k.ime)+'</b></td><td>'+esc(k.telefon||'')+'</td><td>'+esc(k.adresa||'')+'</td><td><button class="btn btn-red btn-sm" onclick="delItem(\'klijenti\',\''+k.id+'\')">✕</button></td></tr>';
+  }).join(''):'<tr><td colspan="4" class="empty">Nema klijenata</td></tr>';
+}
+
+function openKlijentModal(){
+  var c=document.getElementById('modal-content');
+  c.innerHTML='<h3>Novi klijent</h3>'+
+    '<div class="form-grid">'+
+    '<div><label>Ime</label><input id="k-ime" placeholder="Ime i prezime"></div>'+
+    '<div><label>Telefon</label><input id="k-tel" placeholder="Telefon"></div>'+
+    '<div><label>Adresa</label><input id="k-adr" placeholder="Adresa"></div>'+
+    '</div>'+
+    '<div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Otkaži</button><button class="btn btn-accent" onclick="saveKlijent()">Sačuvaj</button></div>';
+  document.getElementById('modal').classList.add('show');
+}
+
+async function saveKlijent(){
+  var ime=v('k-ime');
+  if(!ime){alert('Ime je obavezno!');return;}
+  cache.klijenti.push({
+    id:uid(),
+    ime:ime,
+    telefon:v('k-tel'),
+    adresa:v('k-adr')
+  });
+  await saveUserData();
+  closeModal();
+  renderKlijenti();
+}
+
+/* RASHODI */
+function renderRashodi(){
+  var list=cache.rashodi.sort(function(a,b){return new Date(b.datum)-new Date(a.datum)});
+  document.getElementById('tbl-rashodi').innerHTML=list.length?list.map(function(r){
+    return'<tr><td>'+fd(r.datum)+'</td><td>'+esc(r.kategorija||'')+'</td><td>'+esc(r.opis||'')+'</td><td>'+km(r.iznos)+'</td><td><button class="btn btn-red btn-sm" onclick="delItem(\'rashodi\',\''+r.id+'\')">✕</button></td></tr>';
+  }).join(''):'<tr><td colspan="5" class="empty">Nema rashoda</td></tr>';
+}
+
+function openRashodModal(){
+  var c=document.getElementById('modal-content');
+  c.innerHTML='<h3>Novi rashod</h3>'+
+    '<div class="form-grid">'+
+    '<div><label>Datum</label><input type="date" id="r-datum" value="'+new Date().toISOString().slice(0,10)+'"></div>'+
+    '<div><label>Kategorija</label><select id="r-kat"><option>Materijal</option><option>Alat</option><option>Transport</option><option>Hrana</option><option>Ostalo</option></select></div>'+
+    '<div><label>Opis</label><input id="r-opis" placeholder="Opis"></div>'+
+    '<div><label>Iznos (KM)</label><input type="number" step="0.01" id="r-iznos" placeholder="0.00"></div>'+
+    '</div>'+
+    '<div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Otkaži</button><button class="btn btn-accent" onclick="saveRashod()">Sačuvaj</button></div>';
+  document.getElementById('modal').classList.add('show');
+}
+
+async function saveRashod(){
+  cache.rashodi.push({
+    id:uid(),
+    datum:v('r-datum'),
+    kategorija:v('r-kat'),
+    opis:v('r-opis'),
+    iznos:Number(v('r-iznos'))||0
+  });
+  await saveUserData();
+  closeModal();
+  renderRashodi();
+}
+
+/* MATERIJAL */
+function renderMaterijal(){
+  var list=cache.materijal;
+  document.getElementById('tbl-materijal').innerHTML=list.length?list.map(function(m){
+    var ok=m.kolicina>m.minStanje;
+    return'<tr><td>'+esc(m.naziv)+'</td><td>'+(m.kategorija||'-')+'</td><td>'+m.kolicina+' '+(m.jedinica||'kom')+'</td><td>'+m.minStanje+'</td><td><span class="badge '+(ok?'badge-green':'badge-red')+'">'+(ok?'OK':'NARUČI')+'</span></td><td><button class="btn btn-red btn-sm" onclick="delItem(\'materijal\',\''+m.id+'\')">✕</button></td></tr>';
+  }).join(''):'<tr><td colspan="6" class="empty">Nema materijala</td></tr>';
+}
+
+function openMaterijalModal(){
+  var c=document.getElementById('modal-content');
+  c.innerHTML='<h3>Novi materijal</h3>'+
+    '<div class="form-grid">'+
+    '<div><label>Naziv</label><input id="m-naziv"></div>'+
+    '<div><label>Kategorija</label><select id="m-kat"><option>Boje</option><option>Glet masa</option><option>Četke</option><option>Valjci</option><option>Trake</option><option>Folije</option><option>Brusni papir</option><option>Ostalo</option></select></div>'+
+    '<div><label>Količina</label><input type="number" step="0.1" id="m-kol"></div>'+
+    '<div><label>Jedinica</label><select id="m-jed"><option>kom</option><option>L</option><option>kg</option><option>m</option><option>m²</option></select></div>'+
+    '<div><label>Min. stanje</label><input type="number" step="0.1" id="m-min"></div>'+
+    '<div><label>Cijena/jed (KM)</label><input type="number" step="0.01" id="m-cijena"></div>'+
+    '</div>'+
+    '<div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Otkaži</button><button class="btn btn-accent" onclick="saveMaterijal()">Sačuvaj</button></div>';
+  document.getElementById('modal').classList.add('show');
+}
+
+async function saveMaterijal(){
+  cache.materijal.push({
+    id:uid(),
+    naziv:v('m-naziv'),
+    kategorija:v('m-kat'),
+    kolicina:Number(v('m-kol'))||0,
+    jedinica:v('m-jed'),
+    minStanje:Number(v('m-min'))||0,
+    cijena:Number(v('m-cijena'))||0
+  });
+  await saveUserData();
+  closeModal();
+  renderMaterijal();
+}
+
+/* DELETE */
+async function delItem(t,id){
+  if(!confirm('Obrisati?'))return;
+  cache[t]=cache[t].filter(function(x){return x.id!==id});
+  await saveUserData();
+  var pg=document.querySelector('.page.active');
+  if(pg)showPage(pg.id.replace('pg-',''));
+}
+
+/* EXPORT/IMPORT */
+function exportData(){
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(cache,null,2)],{type:'application/json'}));
+  a.download='moler-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+
+async function importData(e){
+  var f=e.target.files[0];
+  if(!f)return;
+  var r=new FileReader();
+  r.onload=async function(){
+    try{
+      cache=JSON.parse(r.result);
+      await saveUserData();
+      location.reload();
+    }catch(e){
+      alert('Greška pri importu!');
+    }
+  };
+  r.readAsText(f);
+}
+
+/* MODAL */
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+}
+</script>
+</body>
+</html>
