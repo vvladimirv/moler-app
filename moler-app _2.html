@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOLER PRO</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTU9MRVIgUFJPIiwic2hvcnRfbmFtZSI6Ik1PTEVSIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwZjBmMGYiLCJ0aGVtZV9jb2xvciI6IiM0MmE1ZjUifQ==">
+<style>
+:root{--bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#252525;--accent:#42a5f5;--accent2:#1565c0;--text:#e0e0e0;--text2:#999;--green:#4caf50;--red:#e53935;--orange:#ff9800}
+html.light{--bg:#f5f5f5;--bg2:#fff;--bg3:#eee;--accent:#1565c0;--text:#1a1a1a;--text2:#666}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Segoe UI,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+/* LOGIN */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{background:var(--bg2);border-radius:16px;padding:32px;max-width:400px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.5)}
+.login-logo{font-size:2.5em;text-align:center;margin-bottom:8px}
+.login-title{font-size:1.5em;font-weight:700;color:var(--accent);text-align:center;margin-bottom:24px}
+.login-title span{display:block;font-size:.5em;color:var(--text2);font-weight:400;margin-top:4px}
+.login-tabs{display:flex;margin-bottom:20px;border-radius:8px;overflow:hidden;background:var(--bg3)}
+.login-tab{flex:1;padding:12px;border:none;background:none;color:var(--text2);cursor:pointer;font-weight:600}
+.login-tab.active{background:var(--accent);color:#fff}
+.login-form{display:none}
+.login-form.active{display:block}
+.login-form label{display:block;font-size:.8em;color:var(--text2);margin-bottom:4px;margin-top:12px}
+.login-form input{width:100%;padding:12px;background:var(--bg3);border:1px solid #444;border-radius:8px;color:var(--text);font-size:1em}
+.login-btn{width:100%;padding:14px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:1em;font-weight:600;cursor:pointer;margin-top:20px}
+.login-btn:hover{background:var(--accent2)}
+.login-error{background:#b71c1c;color:#ef9a9a;padding:10px;border-radius:8px;margin-top:12px;font-size:.9em;display:none}
+.login-success{background:#1b5e20;color:#a5d6a7;padding:10px;border-radius:8px;margin-top:12px;font-size:.9em;display:none}
+/* NAV */
+.nav{background:var(--bg2);border-bottom:2px solid var(--accent);padding:0 16px;display:flex;align-items:center;gap:4px;overflow-x:auto;position:sticky;top:0;z-index:100}
+.nav-brand{font-size:1.2em;font-weight:700;color:var(--accent);padding:12px 8px;white-space:nowrap}
+.nav button{background:none;border:none;color:var(--text2);padding:12px 14px;cursor:pointer;font-size:.9em;border-bottom:2px solid transparent}
+.nav button:hover{color:var(--text)}
+.nav button.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.user-info{font-size:.8em;color:var(--text2);padding:4px 12px;background:var(--bg3);border-radius:20px}
+.logout-btn{background:none;border:1px solid var(--red);color:var(--red);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:.8em}
+.sync-status{font-size:.75em;padding:4px 10px;border-radius:20px;background:var(--bg3)}
+.sync-status.online{background:#1b5e20;color:#a5d6a7}
+.sync-status.offline{background:#b71c1c;color:#ef9a9a}
+/* PAGES */
+.page{display:none;padding:20px;max-width:1400px;margin:0 auto}
+.page.active{display:block}
+h2{color:var(--accent);margin-bottom:16px}
+h3{color:var(--accent);margin-bottom:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.card{background:var(--bg2);border-radius:10px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.card-label{font-size:.75em;color:var(--text2);text-transform:uppercase;margin-bottom:4px}
+.card-value{font-size:1.5em;font-weight:700}
+.c-green{color:var(--green)}.c-red{color:var(--red)}.c-accent{color:var(--accent)}.c-orange{color:var(--orange)}
+/* SEARCH */
+.search-bar{display:flex;gap:8px;margin-bottom:16px}
+.search-bar input{flex:1;padding:10px 14px;background:var(--bg2);border:1px solid #444;border-radius:8px;color:var(--text);font-size:.95em}
+.search-bar input:focus{outline:none;border-color:var(--accent)}
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:.85em}
+th{background:var(--bg2);color:var(--accent);padding:10px 12px;text-align:left}
+td{padding:8px 12px;border-bottom:1px solid #333}
+tr:hover{background:var(--bg3)}
+.badge{padding:3px 10px;border-radius:12px;font-size:.8em;font-weight:600}
+.badge-blue{background:#0d47a1;color:#90caf9}
+.badge-yellow{background:#e65100;color:#ffcc80}
+.badge-green{background:#1b5e20;color:#a5d6a7}
+.badge-red{background:#b71c1c;color:#ef9a9a}
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+label{display:block;font-size:.8em;color:var(--text2);margin-bottom:4px}
+input,select,textarea{width:100%;padding:9px 12px;background:var(--bg2);border:1px solid #444;border-radius:6px;color:var(--text)}
+.btn{padding:9px 20px;border:none;border-radius:6px;cursor:pointer;font-size:.9em;font-weight:600}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-outline{background:none;border:1px solid var(--accent);color:var(--accent)}
+.btn-sm{padding:5px 12px;font-size:.8em}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;justify-content:center;align-items:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border-radius:10px;padding:24px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-lg{max-width:900px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.section{background:var(--bg2);border-radius:10px;padding:16px;margin-bottom:16px}
+.empty{text-align:center;padding:40px;color:var(--text2)}
+.save-indicator{position:fixed;bottom:20px;right:20px;background:var(--green);color:#fff;padding:10px 20px;border-radius:20px;opacity:0;transition:opacity .3s}
+.save-indicator.show{opacity:1}
+/* KANBAN */
+.kanban-wrap{display:none;gap:12px;overflow-x:auto;padding-bottom:16px}
+.kanban-col{min-width:280px;flex:1;background:var(--bg2);border-radius:10px;overflow:hidden;max-height:calc(100vh - 200px);display:flex;flex-direction:column}
+.kanban-header{color:#fff;padding:12px 14px;font-weight:600}
+.kanban-cards{padding:8px;overflow-y:auto;flex:1}
+.kanban-card{background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:8px;cursor:grab;border-left:3px solid var(--accent)}
+.kanban-card:hover{background:#333}
+.kanban-card-title{font-weight:600;margin-bottom:4px}
+.kanban-card-meta{font-size:.8em;color:var(--accent);margin-bottom:6px}
+.kanban-card-actions{display:flex;gap:4px}
+.kanban-col.drag-over{box-shadow:0 0 0 2px var(--accent)}
+.tbl-wrap{overflow-x:auto}
+/* CHART */
+.chart-container{background:var(--bg2);border-radius:10px;padding:16px;margin-bottom:16px}
+.chart-container canvas{max-height:250px}
+/* CLIENT DETAIL */
+.client-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.client-info{flex:1}
+.client-info h3{margin-bottom:4px}
+.client-info p{color:var(--text2);font-size:.9em}
+.client-stats{display:flex;gap:16px}
+.client-stat{text-align:center}
+.client-stat-value{font-size:1.5em;font-weight:700;color:var(--accent)}
+.client-stat-label{font-size:.75em;color:var(--text2)}
+/* YEAR TABS */
+.year-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.year-tab{padding:8px 16px;background:var(--bg2);border:none;border-radius:6px;color:var(--text2);cursor:pointer;font-size:.9em}
+.year-tab.active{background:var(--accent);color:#fff}
+@media(max-width:600px){.cards{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.client-header{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+<div class="login-box">
+<div class="login-logo">🖌️</div>
+<div class="login-title">MOLER PRO<span>Molarsko poslovanje</span></div>
+<div class="login-tabs">
+<button class="login-tab active" onclick="showLoginTab('login')">Prijava</button>
+<button class="login-tab" onclick="showLoginTab('register')">Registracija</button>
+</div>
+<form id="login-form" class="login-form active" onsubmit="handleLogin(event)">
+<label>Email</label><input type="email" id="login-email" required placeholder="vas@email.com">
+<label>Lozinka</label><input type="password" id="login-password" required placeholder="••••••••">
+<button type="submit" class="login-btn">Prijavi se</button>
+<div class="login-error" id="login-error"></div>
+</form>
+<form id="register-form" class="login-form" onsubmit="handleRegister(event)">
+<label>Email</label><input type="email" id="reg-email" required placeholder="vas@email.com">
+<label>Lozinka (min 6 znakova)</label><input type="password" id="reg-password" required minlength="6" placeholder="••••••••">
+<label>Potvrdi lozinku</label><input type="password" id="reg-password2" required placeholder="••••••••">
+<button type="submit" class="login-btn">Registruj se</button>
+<div class="login-error" id="reg-error"></div>
+<div class="login-success" id="reg-success"></div>
+</form>
+</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" style="display:none">
+<nav class="nav">
+<div class="nav-brand">🖌️ MOLER PRO</div>
+<button onclick="showPage('dashboard')" class="active" data-page="dashboard">Dashboard</button>
+<button onclick="showPage('projekti')" data-page="projekti">Projekti</button>
+<button onclick="showPage('klijenti')" data-page="klijenti">Klijenti</button>
+<button onclick="showPage('rashodi')" data-page="rashodi">Rashodi</button>
+<button onclick="showPage('materijal')" data-page="materijal">Materijal</button>
+<button onclick="showPage('postavke')" data-page="postavke">Postavke</button>
+<div class="nav-right">
+<span class="user-info" id="user-display"></span>
+<span class="sync-status" id="sync-status">Offline</span>
+<button class="logout-btn" onclick="handleLogout()">Odjava</button>
+</div>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="pg-dashboard" class="page active">
+<div class="year-tabs" id="year-tabs"></div>
+<h2 id="dash-title">Dashboard</h2>
+<div class="cards" id="dash-cards"></div>
+<div class="chart-container"><canvas id="revenue-chart"></canvas></div>
+</div>
+
+<!-- PROJEKTI -->
+<div id="pg-projekti" class="page">
+<div class="search-bar"><input type="text" id="proj-search" placeholder="🔍 Pretraga projekata..." oninput="renderProjekti()"></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:16px;align-items:center;flex-wrap:wrap;gap:8px">
+<h2 style="margin:0">Projekti</h2>
+<div style="display:flex;gap:8px">
+<button class="btn btn-sm btn-outline" id="toggle-kanban" onclick="toggleKanban()">📊 Kanban</button>
+<button class="btn btn-accent" onclick="openProjektModal()">+ Novi</button>
+</div></div>
+<div class="kanban-wrap" id="kanban-wrap"><div id="kanban-content" style="display:flex;gap:12px"></div></div>
+<div class="tbl-wrap" id="tbl-wrap"><table><thead><tr><th>Datum</th><th>Klijent</th><th>Adresa</th><th>m²</th><th>Cijena</th><th>Status</th><th></th></tr></thead><tbody id="tbl-projekti"></tbody></table></div>
+</div>
+
+<!-- KLIJENTI -->
+<div id="pg-klijenti" class="page">
+<div class="search-bar"><input type="text" id="klijent-search" placeholder="🔍 Pretraga klijenata..." oninput="renderKlijenti()"></div>
+<div style="display:flex;justify-content:space-between;margin-bottom:16px"><h2 style="margin:0">Klijenti</h2><button class="btn btn-accent" onclick="openKlijentModal()">+ Novi</button></div>
+<div class="tbl-wrap"><table><thead><tr><th>Ime</th><th>Telefon</th><th>Adresa</th><th>Projekata</h2><th>Ukupno</th><th></th></tr></thead><tbody id="tbl-klijenti"></tbody></table></div>
+</div>
+
+<!-- RASHODI -->
+<div id="pg-rashodi" class="page">
+<div style="display:flex;justify-content:space-between;margin-bottom:16px"><h2 style="margin:0">Rashodi</h2><button class="btn btn-accent" onclick="openRashodModal()">+ Novi</button></div>
+<div class="cards" id="rashod-cards"></div>
+<div class="tbl-wrap"><table><thead><tr><th>Datum</th><th>Kategorija</th><th>Opis</th><th>Iznos</th><th></th></tr></thead><tbody id="tbl-rashodi"></tbody></table></div>
+</div>
+
+<!-- MATERIJAL -->
+<div id="pg-materijal" class="page">
+<div style="display:flex;justify-content:space-between;margin-bottom:16px"><h2 style="margin:0">Materijal</h2><button class="btn btn-accent" onclick="openMatModal()">+ Novi</button></div>
+<div class="cards" id="mat-cards"></div>
+<div class="tbl-wrap"><table><thead><tr><th>Naziv</th><th>Kategorija</th><th>Kol.</th><th>Min</th><th>Status</th><th></th></tr></thead><tbody id="tbl-materijal"></tbody></table></div>
+</div>
+
+<!-- POSTAVKE -->
+<div id="pg-postavke" class="page">
+<h2>Postavke</h2>
+<div class="section">
+<h3>Firebase Sync</h3>
+<p style="color:var(--text2)">Podaci su privatni i sinhronizovani sa oblakom.</p>
+</div>
+<div class="section">
+<h3>Backup</h3>
+<button class="btn btn-accent" onclick="exportData()">📥 Export JSON</button>
+<button class="btn btn-outline" onclick="document.getElementById('imp').click()">📤 Import</button>
+<input type="file" id="imp" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+<div class="section">
+<h3>Offline Mode</h3>
+<p style="color:var(--text2);margin-bottom:8px">Aplikacija radi i bez interneta. Podaci se sinhronizuju kad se povežeš.</p>
+<p style="color:var(--green)" id="offline-status">✓ Offline podrška aktivna</p>
+</div>
+</div>
+
+<div class="modal-overlay" id="modal"><div class="modal" id="modal-content"></div></div>
+<div class="save-indicator" id="save-indicator">✓ Sačuvano</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+var firebaseConfig={apiKey:"AIzaSyApxTNqgdowuTGZhGAGfxZFzb4t_pk3bSE",authDomain:"molerpro-7e259.firebaseapp.com",projectId:"molerpro-7e259",storageBucket:"molerpro-7e259.firebasestorage.app",messagingSenderId:"555869830778",appId:"1:555869830778:web:5db14ab49642ee9b6e45c3"};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth();
+var db=firebase.firestore();
+
+var currentUser=null;
+var cache={settings:{},projekti:[],klijenti:[],rashodi:[],materijal:[]};
+var kanbanView=false;
+var selectedYear=new Date().getFullYear();
+var revenueChart=null;
+
+/* AUTH */
+function showLoginTab(tab){
+document.querySelectorAll('.login-tab').forEach(function(t){t.classList.remove('active')});
+document.querySelectorAll('.login-form').forEach(function(f){f.classList.remove('active')});
+if(tab==='login'){document.querySelector('.login-tab:first-child').classList.add('active');document.getElementById('login-form').classList.add('active')}
+else{document.querySelector('.login-tab:last-child').classList.add('active');document.getElementById('register-form').classList.add('active')}
+document.getElementById('login-error').style.display='none';document.getElementById('reg-error').style.display='none';document.getElementById('reg-success').style.display='none'}
+
+async function handleLogin(e){
+e.preventDefault();var email=document.getElementById('login-email').value;var pass=document.getElementById('login-password').value;
+try{document.getElementById('login-error').style.display='none';await auth.signInWithEmailAndPassword(email,pass)}
+catch(err){document.getElementById('login-error').textContent=err.message;document.getElementById('login-error').style.display='block'}}
+
+async function handleRegister(e){
+e.preventDefault();var email=document.getElementById('reg-email').value;var pass=document.getElementById('reg-password').value;var pass2=document.getElementById('reg-password2').value;
+document.getElementById('reg-error').style.display='none';document.getElementById('reg-success').style.display='none';
+if(pass!==pass2){document.getElementById('reg-error').textContent='Lozinke se ne poklapaju!';document.getElementById('reg-error').style.display='block';return}
+try{await auth.createUserWithEmailAndPassword(email,pass);document.getElementById('reg-success').textContent='Nalog kreiran!';document.getElementById('reg-success').style.display='block'}
+catch(err){document.getElementById('reg-error').textContent=err.message;document.getElementById('reg-error').style.display='block'}}
+
+function handleLogout(){auth.signOut()}
+
+auth.onAuthStateChanged(function(user){
+if(user){currentUser=user;document.getElementById('login-screen').style.display='none';document.getElementById('main-app').style.display='block';document.getElementById('user-display').textContent=user.email;loadUserData()}
+else{currentUser=null;document.getElementById('login-screen').style.display='flex';document.getElementById('main-app').style.display='none'}});
+
+/* DATA */
+function showSave(){var e=document.getElementById('save-indicator');e.classList.add('show');setTimeout(function(){e.classList.remove('show')},1500)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function km(n){return(n||0).toLocaleString('de-DE',{minimumFractionDigits:2})+' KM'}
+function fd(d){return d?new Date(d).toLocaleDateString('bs-BA'):''}
+function v(id){return document.getElementById(id)?document.getElementById(id).value:''}
+function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+function updateSyncStatus(){var s=document.getElementById('sync-status');if(navigator.onLine){s.textContent='Online';s.className='sync-status online'}else{s.textContent='Offline';s.className='sync-status offline'}}
+window.addEventListener('online',function(){updateSyncStatus();saveUserData()});window.addEventListener('offline',updateSyncStatus);
+
+async function loadUserData(){
+if(!currentUser)return;
+updateSyncStatus();
+try{var snap=await db.collection('moler').doc(currentUser.uid).get();
+if(snap.exists){var d=snap.data();cache.settings=d.settings||{};cache.projekti=d.projekti||[];cache.klijenti=d.klijenti||[];cache.rashodi=d.rashodi||[];cache.materijal=d.materijal||[]}
+renderYearTabs();renderDashboard()}catch(e){console.log('Load error:',e)}}
+
+async function saveUserData(){
+if(!currentUser)return;
+localStorage.setItem('moler-cache',JSON.stringify(cache));
+if(navigator.onLine){try{await db.collection('moler').doc(currentUser.uid).set({settings:cache.settings,projekti:cache.projekti,klijenti:cache.klijenti,rashodi:cache.rashodi,materijal:cache.materijal,updated:firebase.firestore.FieldValue.serverTimestamp()})}catch(e){console.log('Save error:',e)}}
+showSave()}
+
+function calcProjectArea(rooms){return(rooms||[]).reduce(function(s,r){var w=Number(r.sirina)||0,l=Number(r.duzina)||0,h=Number(r.visina)||0,wa=2*(w+l)*h-(Number(r.vrata)||0)*1.9-(Number(r.prozori)||0)*1.5;return s+Math.max(0,wa)+(r.plafon?w*l:0)},0)}
+function calcProjectPrice(p){return Math.round(calcProjectArea(p.prostorije)*(Number(p.premaza)||1)*(Number(p.cijenaM2)||0)*100)/100}
+
+/* YEAR TABS */
+function renderYearTabs(){
+var years=new Set([new Date().getFullYear()]);
+cache.projekti.forEach(function(p){if(p.datum){var y=new Date(p.datum).getFullYear();if(!isNaN(y))years.add(y)}});
+years=Array.from(years).sort(function(a,b){return b-a});
+var html=years.map(function(y){return'<button class="year-tab'+(y===selectedYear?' active':'')+'" onclick="selectYear('+y+')">'+y+'</button>'}).join('');
+document.getElementById('year-tabs').innerHTML=html}
+
+function selectYear(y){selectedYear=y;document.querySelectorAll('.year-tab').forEach(function(t){t.classList.toggle('active',t.textContent==y)});renderDashboard()}
+
+/* DASHBOARD */
+function renderDashboard(){
+document.getElementById('dash-title').textContent='Dashboard - '+selectedYear;
+var done=cache.projekti.filter(function(p){var d=new Date(p.datum);return d.getFullYear()===selectedYear&&p.status==='Završen'});
+var rev=done.reduce(function(s,p){return s+(p.ukupnaCijena||calcProjectPrice(p))},0);
+var exp=cache.rashodi.filter(function(r){var d=new Date(r.datum);return d.getFullYear()===selectedYear}).reduce(function(s,r){return s+Number(r.iznos||0)},0);
+var m2=done.reduce(function(s,p){return s+calcProjectArea(p.prostorije)},0);
+var active=cache.projekti.filter(function(p){return p.status==='U toku'}).length;
+document.getElementById('dash-cards').innerHTML=
+'<div class="card"><div class="card-label">Prihod '+selectedYear+'</div><div class="card-value c-green">'+km(rev)+'</div></div>'+
+'<div class="card"><div class="card-label">Rashodi</div><div class="card-value c-red">'+km(exp)+'</div></div>'+
+'<div class="card"><div class="card-label">Profit</div><div class="card-value c-accent">'+km(rev-exp)+'</div></div>'+
+'<div class="card"><div class="card-label">Projekata</div><div class="card-value c-orange">'+done.length+'</div></div>'+
+'<div class="card"><div class="card-label">m² obojeno</div><div class="card-value">'+Math.round(m2)+'</div></div>'+
+'<div class="card"><div class="card-label">Aktivnih</div><div class="card-value">'+active+'</div></div>';
+renderRevenueChart()}
+
+function renderRevenueChart(){
+var monthlyData={};for(var i=1;i<=12;i++)monthlyData[i]={prihod:0,rashod:0};
+cache.projekti.forEach(function(p){if(p.status==='Završen'&&new Date(p.datum).getFullYear()===selectedYear){var m=new Date(p.datum).getMonth()+1;monthlyData[m].prihod+=p.ukupnaCijena||calcProjectPrice(p)}});
+cache.rashodi.forEach(function(r){if(new Date(r.datum).getFullYear()===selectedYear){var m=new Date(r.datum).getMonth()+1;monthlyData[m].rashod+=Number(r.iznos||0)}});
+var labels=['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Avg','Sep','Okt','Nov','Dec'];
+var prihodi=Object.values(monthlyData).map(function(d){return d.prihod});
+var rashodi=Object.values(monthlyData).map(function(d){return d.rashod});
+if(revenueChart)revenueChart.destroy();
+revenueChart=new Chart(document.getElementById('revenue-chart'),{
+type:'bar',
+data:{labels:labels,datasets:[
+{label:'Prihod',data:prihodi,backgroundColor:'#4caf50'},
+{label:'Rashod',data:rashodi,backgroundColor:'#e53935'}]},
+options:{responsive:true,plugins:{legend:{labels:{color:'#999'}}},scales:{y:{ticks:{color:'#999',callback:function(v){return km(v).replace(' KM','')}},grid:{color:'#333'}},x:{ticks:{color:'#999'},grid:{display:false}}}}})}
+
+/* PROJEKTI */
+function showPage(id){
+document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+document.getElementById('pg-'+id).classList.add('active');
+document.querySelectorAll('.nav button[data-page]').forEach(function(b){b.classList.toggle('active',b.dataset.page===id)});
+if(id==='dashboard')renderDashboard();
+if(id==='projekti'){kanbanView=false;document.getElementById('toggle-kanban').textContent='📊 Kanban';document.getElementById('tbl-wrap').style.display='block';document.getElementById('kanban-wrap').style.display='none';renderProjekti()}
+if(id==='klijenti')renderKlijenti();if(id==='rashodi')renderRashodi();if(id==='materijal')renderMaterijal()}
+
+function renderProjekti(){
+var search=(document.getElementById('proj-search')?.value||'').toLowerCase();
+var list=cache.projekti.filter(function(p){return!search||p.klijent.toLowerCase().indexOf(search)>-1||(p.adresa||'').toLowerCase().indexOf(search)>-1}).sort(function(a,b){return new Date(b.datum)-new Date(a.datum)});
+var sb={'Ponuda':'badge-blue','U toku':'badge-yellow','Završen':'badge-green','Otkazan':'badge-red'};
+document.getElementById('tbl-projekti').innerHTML=list.length?list.map(function(p){return'<tr><td>'+fd(p.datum)+'</td><td><b>'+esc(p.klijent)+'</b></td><td>'+esc(p.adresa||'')+'</td><td>'+Math.round(calcProjectArea(p.prostorije))+'</td><td>'+km(p.ukupnaCijena||calcProjectPrice(p))+'</td><td><span class="badge '+sb[p.status]+'">'+p.status+'</span></td><td><button class="btn btn-sm btn-outline" onclick="editProjekt(\''+p.id+'\')">✎</button> <button class="btn btn-red btn-sm" onclick="delItem(\'projekti\',\''+p.id+'\')">✕</button></td></tr>'}).join(''):'<tr><td colspan="7" class="empty">Nema projekata</td></tr>'}
+
+function toggleKanban(){kanbanView=!kanbanView;document.getElementById('toggle-kanban').textContent=kanbanView?'📋 Tabela':'📊 Kanban';document.getElementById('tbl-wrap').style.display=kanbanView?'none':'block';document.getElementById('kanban-wrap').style.display=kanbanView?'flex':'none';if(kanbanView)renderKanban()}
+function renderKanban(){
+var cols={'Ponuda':{color:'#0d47a1',projects:[]},'U toku':{color:'#e65100',projects:[]},'Završen':{color:'#1b5e20',projects:[]}};
+cache.projekti.forEach(function(p){if(cols[p.status])cols[p.status].projects.push(p)});
+var html='';
+for(var s in cols){var c=cols[s];html+='<div class="kanban-col" data-status="'+s+'" ondragover="event.preventDefault()" ondrop="drop(event)" ondragenter="this.classList.add(\'drag-over\')" ondragleave="this.classList.remove(\'drag-over\')"><div class="kanban-header" style="background:'+c.color+'">'+s+' ('+c.projects.length+')</div><div class="kanban-cards">';
+c.projects.forEach(function(p){html+='<div class="kanban-card" draggable="true" ondragstart="event.dataTransfer.setData(\'text\',\''+p.id+'\')" data-id="'+p.id+'"><div class="kanban-card-title">'+esc(p.klijent)+'</div><div class="kanban-card-meta">'+Math.round(calcProjectArea(p.prostorije))+' m² | '+km(p.ukupnaCijena||calcProjectPrice(p))+'</div><div class="kanban-card-actions"><button class="btn btn-sm btn-outline" onclick="event.stopPropagation();editProjekt(\''+p.id+'\')">✎</button></div></div>'});
+html+='</div></div>'}
+document.getElementById('kanban-content').innerHTML=html}
+async function drop(ev){ev.preventDefault();var id=ev.dataTransfer.getData('text');var col=ev.target.closest('.kanban-col');if(!col)return;var ns=col.dataset.status;var p=cache.projekti.find(function(x){return x.id===id});if(p&&p.status!==ns){p.status=ns;await saveUserData();renderKanban()}}
+
+var tempRooms=[],editId=null;
+function openProjektModal(ex){editId=ex?ex.id:null;tempRooms=ex?(ex.prostorije||[]).map(function(r){return Object.assign({},r)}):[];
+var kOpts=cache.klijenti.map(function(k){return'<option value="'+esc(k.ime)+'" data-tel="'+esc(k.telefon||'')+'">'+esc(k.ime)+'</option>'}).join('');
+var c=document.getElementById('modal-content');
+c.innerHTML='<h3>'+(ex?'Uredi':'Novi')+' projekt</h3><div class="form-grid"><div><label>Datum</label><input type="date" id="f-datum" value="'+(ex?ex.datum:new Date().toISOString().slice(0,10))+'"></div><div><label>Klijent</label><select id="f-klijent" onchange="fillKlijentData()"><option value="">-- Odaberi ili upiši --</option>'+kOpts+'</select><input id="f-klijent-manual" placeholder="Ili novi klijent" style="margin-top:4px"></div><div><label>Telefon</label><input id="f-tel" value="'+esc(ex?ex.telefon||'':'')+'"></div><div><label>Adresa</label><input id="f-adresa" value="'+esc(ex?ex.adresa||'':'')+'"></div><div><label>Status</label><select id="f-status"><option>Ponuda</option><option>U toku</option><option>Završen</option><option>Otkazan</option></select></div><div><label>m² cijena (KM)</label><input type="number" step="0.5" id="f-cijena" value="'+(ex?ex.cijenaM2||5:5)+'"></div></div><div id="rooms-div"></div><button class="btn btn-sm btn-outline" onclick="addRoom()">+ Prostorija</button><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Otkaži</button><button class="btn btn-accent" onclick="saveProjekt()">Sačuvaj</button></div>';
+if(ex){document.getElementById('f-status').value=ex.status;document.getElementById('f-klijent').value=ex.klijent}
+renderRooms();document.getElementById('modal').classList.add('show')}
+function fillKlijentData(){var sel=document.getElementById('f-klijent');
+if(sel.selectedIndex>0){var opt=sel.options[sel.selectedIndex];document.getElementById('f-tel').value=opt.dataset.tel||''}}
+function addRoom(){tempRooms.push({naziv:'Soba '+tempRooms.length,sirina:0,duzina:0,visina:2.6,vrata:1,prozori:1,plafon:false});renderRooms()}
+function renderRooms(){var c=document.getElementById('rooms-div');if(!c)return;c.innerHTML=tempRooms.map(function(r,i){var a=calcProjectArea([r]);return'<div style="background:var(--bg3);padding:8px;margin:4px 0;border-radius:6px"><input placeholder="Naziv" value="'+esc(r.naziv||'')+'" onchange="tempRooms['+i+'].naziv=this.value" style="width:100px"> <input type="number" placeholder="Š" step="0.1" value="'+(r.sirina||'')+'" onchange="tempRooms['+i+'].sirina=this.value;renderRooms()" style="width:55px"> x <input type="number" placeholder="D" step="0.1" value="'+(r.duzina||'')+'" onchange="tempRooms['+i+'].duzina=this.value;renderRooms()" style="width:55px"> x <input type="number" placeholder="V" step="0.1" value="'+(r.visina||'')+'" onchange="tempRooms['+i+'].visina=this.value;renderRooms()" style="width:55px"> <label style="display:inline"><input type="checkbox" '+(r.plafon?'checked':'')+' onchange="tempRooms['+i+'].plafon=this.checked;renderRooms()"> Plafon</label> <b style="color:var(--accent)">'+Math.round(a)+' m²</b></div>'}).join('')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function editProjekt(id){var p=cache.projekti.find(function(x){return x.id===id});if(p)openProjektModal(p)}
+async function saveProjekt(){var klijent=v('f-klijent')||v('f-klijent-manual');if(!klijent){alert('Klijent je obavezan!');return}
+var o={id:editId||uid(),datum:v('f-datum'),klijent:klijent,telefon:v('f-tel'),adresa:v('f-adresa'),status:v('f-status'),cijenaM2:Number(v('f-cijena'))||5,prostorije:tempRooms};o.ukupnaCijena=calcProjectPrice(o);
+if(editId){var i=cache.projekti.findIndex(function(x){return x.id===editId});if(i>-1)cache.projekti[i]=o}else cache.projekti.push(o);
+var existingK=cache.klijenti.find(function(k){return k.ime.toLowerCase()===klijent.toLowerCase()});
+if(existingK){if(o.telefon)existingK.telefon=o.telefon;if(o.adresa)existingK.adresa=o.adresa}else cache.klijenti.push({id:uid(),ime:klijent,telefon:o.telefon,adresa:o.adresa});
+await saveUserData();closeModal();renderProjekti()}
+
+function renderKlijenti(){var search=(document.getElementById('klijent-search')?.value||'').toLowerCase();
+var list=cache.klijenti.filter(function(k){return!search||k.ime.toLowerCase().indexOf(search)>-1||(k.telefon||'').indexOf(search)>-1});
+document.getElementById('tbl-klijenti').innerHTML=list.length?list.map(function(k){var projs=cache.projekti.filter(function(p){return p.klijent===k.ime});var total=projs.filter(function(p){return p.status==='Završen'}).reduce(function(s,p){return s+(p.ukupnaCijena||0)},0);return'<tr style="cursor:pointer" onclick="showKlijentDetail(\''+k.id+'\')"><td><b>'+esc(k.ime)+'</b></td><td>'+(k.telefon||'-')+'</td><td>'+(k.adresa||'-')+'</td><td>'+projs.length+'</td><td>'+km(total)+'</td><td><button class="btn btn-sm btn-outline" onclick="event.stopPropagation();editKlijent(\''+k.id+'\')">✎</button> <button class="btn btn-red btn-sm" onclick="event.stopPropagation();delItem(\'klijenti\',\''+k.id+'\')">✕</button></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">Nema klijenata</td></tr>'}
+
+function openKlijentModal(ex){var c=document.getElementById('modal-content');c.innerHTML='<h3>'+(ex?'Uredi':'Novi')+' klijent</h3><div class="form-grid"><div><label>Ime i prezime</label><input id="k-ime" value="'+esc(ex?ex.ime:'')+'"></div><div><label>Telefon</label><input id="k-tel" value="'+esc(ex?ex.telefon||'':'')+'"></div><div><label>Adresa</label><input id="k-adr" value="'+esc(ex?ex.adresa||'':'')+'"></div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Otkaži</button><button class="btn btn-accent" onclick="saveKlijent('+(ex?"'"+ex.id+"'":"null")+')">Sačuvaj</button></div>';document.getElementById('modal').classList.add('show')}
+function editKlijent(id){var k=cache.klijenti.find(function(x){return x.id===id});if(k)openKlijentModal(k)}
+async function saveKlijent(editId){var ime=v('k-ime');if(!ime){alert('Ime je obavezno!');return}var o={id:editId||uid(),ime:ime,telefon:v('k-tel'),adresa:v('k-adr')};if(editId){var i=cache.klijenti.findIndex(function(x){return x.id===editId});if(i>-1)cache.klijenti[i]=o}else cache.klijenti.push(o);await saveUserData();closeModal();renderKlijenti()}
+
+function showKlijentDetail(id){var k=cache.klijenti.find(function(x){return x.id===id});if(!k)return;
+var projs=cache.projekti.filter(function(p){return p.klijent===k.ime}).sort(function(a,b){return new Date(b.datum)-new Date(a.datum)});
+var total=projs.reduce(function(s,p){return s+(p.ukupnaCijena||0)},0);
+var c=document.getElementById('modal-content');c.className='modal modal-lg';
+c.innerHTML='<div class="client-header"><div class="client-info"><h3>'+esc(k.ime)+'</h3><p>📞 '+(k.telefon||'-')+' | 📍 '+(k.adresa||'-')+'</p></div><div class="client-stats"><div class="client-stat"><div class="client-stat-value">'+projs.length+'</div><div class="client-stat-label">projekata</div></div><div class="client-stat"><div class="client-stat-value">'+km(total)+'</div><div class="client-stat-label">ukupno</div></div></div></div><h4 style="color:var(--accent);margin:16px 0 8px">Historija projekata</h4><table><thead><tr><th>Datum</th><th>Adresa</th><th>m²</th><th>Cijena</th><th>Status</th></tr></thead><tbody>'+projs.map(function(p){return'<tr><td>'+fd(p.datum)+'</td><td>'+esc(p.adresa||'-')+'</td><td>'+Math.round(calcProjectArea(p.prostorije))+'</td><td>'+km(p.ukupnaCijena||0)+'</td><td><span class="badge badge-'+(p.status==='Završen'?'green':p.status==='U toku'?'yellow':'blue')+'">'+p.status+'</span></td></tr>'}).join('')+'</tbody></table><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal();document.getElementById(\'modal-content\').className=\'modal\'">Zatvori</button></div>';
+document.getElementById('modal').classList.add('show')}
+
+function renderRashodi(){document.getElementById('rashod-cards').innerHTML='<div class="card"><div class="card-label">Ukupno</div><div class="card-value c-red">'+km(cache.rashodi.reduce(function(s,r){return s+Number(r.iznos||0)},0))+'</div></div>';
+var list=cache.rashodi.sort(function(a,b){return new Date(b.datum)-new Date(a.datum)});
+document.getElementById('tbl-rashodi').innerHTML=list.length?list.map(function(r){return'<tr><td>'+fd(r.datum)+'</td><td>'+esc(r.kategorija||'')+'</td><td>'+(r.opis||'-')+'</td><td>'+km(r.iznos)+'</td><td><button class="btn btn-red btn-sm" onclick="delItem(\'rashodi\',\''+r.id+'\')">✕</button></td></tr>'}).join(''):'<tr><td colspan="5" class="empty">Nema rashoda</td></tr>'}
+function openRashodModal(){var c=document.getElementById('modal-content');c.innerHTML='<h3>Novi rashod</h3><div class="form-grid"><div><label>Datum</label><input type="date" id="r-datum" value="'+new Date().toISOString().slice(0,10)+'"></div><div><label>Kategorija</label><select id="r-kat"><option>Materijal</option><option>Transport</option><option>Alat</option><option>Reklama</option><option>Ostalo</option></select></div><div><label>Opis</label><input id="r-opis"></div><div><label>Iznos (KM)</label><input type="number" step="0.01" id="r-iznos"></div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Otkaži</button><button class="btn btn-accent" onclick="saveRashod()">Sačuvaj</button></div>';document.getElementById('modal').classList.add('show')}
+async function saveRashod(){cache.rashodi.push({id:uid(),datum:v('r-datum'),kategorija:v('r-kat'),opis:v('r-opis'),iznos:Number(v('r-iznos'))||0});await saveUserData();closeModal();renderRashodi()}
+
+function renderMaterijal(){var low=cache.materijal.filter(function(m){return m.kolicina<=m.minStanje}).length;
+document.getElementById('mat-cards').innerHTML='<div class="card"><div class="card-label">Vrijednost</div><div class="card-value c-accent">'+km(cache.materijal.reduce(function(s,m){return s+(m.kolicina||0)*(m.cijena||0)},0))+'</div></div><div class="card"><div class="card-label">Naručiti</div><div class="card-value '+(low?'c-red':'c-green')+'">'+low+'</div></div>';
+document.getElementById('tbl-materijal').innerHTML=cache.materijal.length?cache.materijal.map(function(m){return'<tr><td>'+esc(m.naziv)+'</td><td>'+(m.kategorija||'-')+'</td><td>'+m.kolicina+' '+(m.jedinica||'kom')+'</td><td>'+m.minStanje+'</td><td><span class="badge '+(m.kolicina>m.minStanje?'badge-green':'badge-red')+'">'+(m.kolicina>m.minStanje?'OK':'NARUČI')+'</span></td><td><button class="btn btn-red btn-sm" onclick="delItem(\'materijal\',\''+m.id+'\')">✕</button></td></tr>'}).join(''):'<tr><td colspan="6" class="empty">Nema materijala</td></tr>'}
+function openMatModal(){var c=document.getElementById('modal-content');c.innerHTML='<h3>Novi materijal</h3><div class="form-grid"><div><label>Naziv</label><input id="m-naziv"></div><div><label>Kategorija</label><select id="m-kat"><option>Boje</option><option>Glet masa</option><option>Četke</option><option>Valjci</option><option>Trake</option><option>Folije</option><option>Brusni papir</option><option>Ostalo</option></select></div><div><label>Količina</label><input type="number" step="0.1" id="m-kol"></div><div><label>Jedinica</label><select id="m-jed"><option>kom</option><option>L</option><option>kg</option><option>m</option><option>m²</option></select></div><div><label>Min. stanje</label><input type="number" step="0.1" id="m-min"></div><div><label>Cijena/jed (KM)</label><input type="number" step="0.01" id="m-cijena"></div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Otkaži</button><button class="btn btn-accent" onclick="saveMat()">Sačuvaj</button></div>';document.getElementById('modal').classList.add('show')}
+async function saveMat(){cache.materijal.push({id:uid(),naziv:v('m-naziv'),kategorija:v('m-kat'),kolicina:Number(v('m-kol'))||0,jedinica:v('m-jed'),minStanje:Number(v('m-min'))||0,cijena:Number(v('m-cijena'))||0});await saveUserData();closeModal();renderMaterijal()}
+
+async function delItem(t,id){if(!confirm('Obrisati?'))return;cache[t]=cache[t].filter(function(x){return x.id!==id});await saveUserData();var pg=document.querySelector('.page.active');if(pg)showPage(pg.id.replace('pg-',''))}
+function exportData(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(cache,null,2)],{type:'application/json'}));a.download='moler-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click()}
+async function importData(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=async function(){try{cache=JSON.parse(r.result);await saveUserData();location.reload()}catch(e){alert('Greška pri importu!')}};r.readAsText(f)}
+
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===e.currentTarget)closeModal()});
+</script>
+</body>
+</html>
