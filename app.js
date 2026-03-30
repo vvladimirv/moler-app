@@ -32,7 +32,7 @@ function initApp() {
     if (!emailEl || !passEl) return;
     const email = emailEl.value;
     const pass = passEl.value;
-    auth.signInWithEmailAndPassword(email, pass).catch(err => alert('Greška: ' + err.message));
+    auth.signInWithEmailAndPassword(email, pass).catch(err => alert('Greska: ' + err.message));
   }
 
   function handleRegister(e) {
@@ -40,7 +40,7 @@ function initApp() {
     const email = document.getElementById('reg-email').value;
     const pass = document.getElementById('reg-pass').value;
     if (pass.length < 6) { alert('Lozinka mora imati najmanje 6 znakova'); return; }
-    auth.createUserWithEmailAndPassword(email, pass).catch(err => alert('Greška: ' + err.message));
+    auth.createUserWithEmailAndPassword(email, pass).catch(err => alert('Greska: ' + err.message));
   }
 
   function handleLogout() { auth.signOut(); }
@@ -170,7 +170,7 @@ function initApp() {
     document.getElementById('tbl-projekti').innerHTML = filtered.map((p, i) => {
       const klijent = userData.klijenti.find(k => k.id === p.klijentId) || { ime: p.klijent || 'Nepoznato' };
       const idx = userData.projekti.indexOf(p);
-      return '<tr><td>' + p.datum + '</td><td>' + klijent.ime + '</td><td>' + (p.adresa || '') + '</td><td>' + (p.m2 || '') + '</td><td>' + (parseFloat(p.cijena) || 0).toFixed(2) + ' KM</td><td><span class="status-' + p.status + '">' + (p.status === 'zavrsen' ? 'Završen' : 'U tijeku') + '</span></td><td><input type="checkbox" ' + (p.placeno ? 'checked' : '') + ' onclick="togglePaid(' + idx + ')"></td><td><button class="btn-small" onclick="editProjekt(' + idx + ')">✏️</button> <button class="btn-small" onclick="deleteProjekt(' + idx + ')">🗑️</button></td></tr>';
+      return '<tr><td>' + p.datum + '</td><td>' + klijent.ime + '</td><td>' + (p.adresa || '') + '</td><td>' + (p.m2 || '') + '</td><td>' + (parseFloat(p.cijena) || 0).toFixed(2) + ' KM</td><td><span class="status-' + p.status + '">' + (p.status === 'zavrsen' ? 'Zavrsen' : 'U tijeku') + '</span></td><td><input type="checkbox" ' + (p.placeno ? 'checked' : '') + ' onclick="togglePaid(' + idx + ')"></td><td><button class="btn-small" onclick="editProjekt(' + idx + ')">✏️</button> <button class="btn-small" onclick="deleteProjekt(' + idx + ')">🗑️</button></td></tr>';
     }).join('');
   }
 
@@ -186,7 +186,7 @@ function initApp() {
       '<label>Adresa</label><input type="text" name="adresa" value="' + (projekt ? projekt.adresa || '' : '') + '">' +
       '<label>m2</label><input type="number" name="m2" value="' + (projekt ? projekt.m2 || '' : '') + '">' +
       '<label>Cijena (KM)</label><input type="number" name="cijena" step="0.01" value="' + (projekt ? projekt.cijena || '' : '') + '" required>' +
-      '<label>Status</label><select name="status"><option value="u_tijeku" ' + (projekt && projekt.status === 'u_tijeku' ? 'selected' : '') + '>U tijeku</option><option value="zavrsen" ' + (projekt && projekt.status === 'zavrsen' ? 'selected' : '') + '>Završen</option></select>' +
+      '<label>Status</label><select name="status"><option value="u_tijeku" ' + (projekt && projekt.status === 'u_tijeku' ? 'selected' : '') + '>U tijeku</option><option value="zavrsen" ' + (projekt && projekt.status === 'zavrsen' ? 'selected' : '') + '>Zavrsen</option></select>' +
       '<label>Napomena</label><textarea name="napomena">' + (projekt ? projekt.napomena || '' : '') + '</textarea>' +
       '<button type="submit" class="btn btn-accent">Spremi</button></form>';
     document.getElementById('modal').style.display = 'flex';
@@ -204,7 +204,7 @@ function initApp() {
   }
 
   function editProjekt(index) { openProjektModal(index); }
-  function deleteProjekt(index) { if (confirm('Obriši projekt?')) { userData.projekti.splice(index, 1); saveUserData(); renderProjekti(); } }
+  function deleteProjekt(index) { if (confirm('Obrisi projekt?')) { userData.projekti.splice(index, 1); saveUserData(); renderProjekti(); } }
   function togglePaid(index) { userData.projekti[index].placeno = !userData.projekti[index].placeno; saveUserData(); renderProjekti(); }
 
   // Klijenti
@@ -240,7 +240,7 @@ function initApp() {
     renderKlijenti();
   }
   function editKlijent(i) { openKlijentModal(i); }
-  function deleteKlijent(i) { if (confirm('Obriši klijenta?')) { userData.klijenti.splice(i, 1); saveUserData(); renderKlijenti(); } }
+  function deleteKlijent(i) { if (confirm('Obrisi klijenta?')) { userData.klijenti.splice(i, 1); saveUserData(); renderKlijenti(); } }
 
   // Rashodi
   function renderRashodi() {
@@ -274,7 +274,7 @@ function initApp() {
     renderRashodi();
   }
   function editRashod(i) { openRashodModal(i); }
-  function deleteRashod(i) { if (confirm('Obriši rashod?')) { userData.rashodi.splice(i, 1); saveUserData(); renderRashodi(); } }
+  function deleteRashod(i) { if (confirm('Obrisi rashod?')) { userData.rashodi.splice(i, 1); saveUserData(); renderRashodi(); } }
 
   // Materijal
   function renderMaterijal() {
@@ -307,7 +307,7 @@ function initApp() {
     renderMaterijal();
   }
   function editMaterijal(i) { openMaterijalModal(i); }
-  function deleteMaterijal(i) { if (confirm('Obriši materijal?')) { userData.materijal.splice(i, 1); saveUserData(); renderMaterijal(); } }
+  function deleteMaterijal(i) { if (confirm('Obrisi materijal?')) { userData.materijal.splice(i, 1); saveUserData(); renderMaterijal(); } }
 
   function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
@@ -330,7 +330,7 @@ function initApp() {
         saveUserData();
         alert('Podaci uvezeni!');
         navigateTo('dashboard');
-      } catch (err) { alert('Greška: ' + err.message); }
+      } catch (err) { alert('Greska: ' + err.message); }
     };
     reader.readAsText(file);
   }
