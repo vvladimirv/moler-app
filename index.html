@@ -284,7 +284,7 @@ if(snap.exists()){var d=snap.val();cache.settings=d.settings||{};cache.projekti=
 else{cache={settings:{},projekti:[],klijenti:[],rashodi:[],materijal:[]}}
 renderYearTabs();renderDashboard()}).catch(function(e){alert('Load error: '+e.message);console.log('Load error:',e)})
 
-async function saveUserData(){
+function saveUserData(){
 if(!currentUser)return;
 localStorage.setItem('moler-cache',JSON.stringify(cache));
 if(navigator.onLine){
