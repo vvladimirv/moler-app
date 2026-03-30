@@ -281,15 +281,15 @@ if(!currentUser)return;
 updateSyncStatus();
 db.ref('moler/'+currentUser.uid).once('value').then(function(snap){
 if(snap.exists()){var d=snap.val();cache.settings=d.settings||{};cache.projekti=d.projekti||[];cache.klijenti=d.klijenti||[];cache.rashodi=d.rashodi||[];cache.materijal=d.materijal||[]}
-else{alert('No cloud data found');cache={settings:{},projekti:[],klijenti:[],rashodi:[],materijal:[]}}
+else{cache={settings:{},projekti:[],klijenti:[],rashodi:[],materijal:[]}}
 renderYearTabs();renderDashboard()}).catch(function(e){console.log('Load error:',e)})
 
 async function saveUserData(){
 if(!currentUser)return;
 localStorage.setItem('moler-cache',JSON.stringify(cache));
 if(navigator.onLine){
-db.ref('moler/'+currentUser.uid).set({settings:cache.settings,projekti:cache.projekti,klijenti:cache.klijenti,rashodi:cache.rashodi,materijal:cache.materijal,updated:Date.now()}).then(function(){alert('Saved to cloud!')}).catch(function(e){console.log('Save error:',e)})
-}else{}
+db.ref('moler/'+currentUser.uid).set({settings:cache.settings,projekti:cache.projekti,klijenti:cache.klijenti,rashodi:cache.rashodi,materijal:cache.materijal,updated:Date.now()}).then(function(){}).catch(function(e){console.log('Save error:',e)})
+}
 showSave()}
 
 function calcProjectArea(rooms){return(rooms||[]).reduce(function(s,r){var w=Number(r.sirina)||0,l=Number(r.duzina)||0,h=Number(r.visina)||0,wa=2*(w+l)*h-(Number(r.vrata)||0)*1.9-(Number(r.prozori)||0)*1.5;return s+Math.max(0,wa)+(r.plafon?w*l:0)},0)}
