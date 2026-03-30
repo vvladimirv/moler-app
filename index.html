@@ -226,13 +226,13 @@ input,select,textarea{width:100%;padding:9px 12px;background:var(--bg2);border:1
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 var firebaseConfig={apiKey:"AIzaSyApxTNqgdowuTGZhGAGfxZFzb4t_pk3bSE",authDomain:"molerpro-7e259.firebaseapp.com",projectId:"molerpro-7e259",storageBucket:"molerpro-7e259.firebasestorage.app",messagingSenderId:"555869830778",appId:"1:555869830778:web:5db14ab49642ee9b6e45c3"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
-var db=firebase.firestore();
+var db=firebase.database();
 
 var currentUser=null;
 var cache={settings:{},projekti:[],klijenti:[],rashodi:[],materijal:[]};
@@ -279,18 +279,17 @@ window.addEventListener('online',function(){updateSyncStatus();saveUserData()});
 async function loadUserData(){
 if(!currentUser)return;
 updateSyncStatus();
-try{var snap=await db.collection('moler').doc(currentUser.uid).get();
-if(snap.exists){var d=snap.data();cache.settings=d.settings||{};cache.projekti=d.projekti||[];cache.klijenti=d.klijenti||[];cache.rashodi=d.rashodi||[];cache.materijal=d.materijal||[];alert('Loaded from cloud!')}
+db.ref('moler/'+currentUser.uid).once('value').then(function(snap){
+if(snap.exists()){var d=snap.val();cache.settings=d.settings||{};cache.projekti=d.projekti||[];cache.klijenti=d.klijenti||[];cache.rashodi=d.rashodi||[];cache.materijal=d.materijal||[]}
 else{alert('No cloud data found');cache={settings:{},projekti:[],klijenti:[],rashodi:[],materijal:[]}}
-renderYearTabs();renderDashboard()}catch(e){alert('Load error: '+e.message);console.log('Load error:',e)}}
+renderYearTabs();renderDashboard()}).catch(function(e){console.log('Load error:',e)})
 
 async function saveUserData(){
 if(!currentUser)return;
 localStorage.setItem('moler-cache',JSON.stringify(cache));
 if(navigator.onLine){
-try{await db.collection('moler').doc(currentUser.uid).set({settings:cache.settings,projekti:cache.projekti,klijenti:cache.klijenti,rashodi:cache.rashodi,materijal:cache.materijal,updated:firebase.firestore.FieldValue.serverTimestamp()});
-alert('Saved to cloud!')}catch(e){alert('Save error: '+e.message);console.log('Save error:',e)}}
-else{alert('Offline - not saved to cloud!')}
+db.ref('moler/'+currentUser.uid).set({settings:cache.settings,projekti:cache.projekti,klijenti:cache.klijenti,rashodi:cache.rashodi,materijal:cache.materijal,updated:Date.now()}).then(function(){alert('Saved to cloud!')}).catch(function(e){console.log('Save error:',e)})
+}else{}
 showSave()}
 
 function calcProjectArea(rooms){return(rooms||[]).reduce(function(s,r){var w=Number(r.sirina)||0,l=Number(r.duzina)||0,h=Number(r.visina)||0,wa=2*(w+l)*h-(Number(r.vrata)||0)*1.9-(Number(r.prozori)||0)*1.5;return s+Math.max(0,wa)+(r.plafon?w*l:0)},0)}
