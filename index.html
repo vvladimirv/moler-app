@@ -229,6 +229,7 @@ input,select,textarea{width:100%;padding:9px 12px;background:var(--bg2);border:1
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+window.onerror=function(msg,url,line){alert("JS Error: "+msg+" line:"+line)};
 var firebaseConfig={apiKey:"AIzaSyB3pm09C2J_kH5-XvNh2imKiwxh_OTrEEc",authDomain:"molerpro.firebaseapp.com",databaseURL:"https://molerpro-default-rtdb.europe-west1.firebasedatabase.app",projectId:"molerpro",storageBucket:"molerpro.firebasestorage.app",messagingSenderId:"997184398110",appId:"1:997184398110:web:1fd7260e71ba388dc45f0f"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
@@ -282,7 +283,7 @@ updateSyncStatus();
 db.ref('moler/'+currentUser.uid).once('value').then(function(snap){
 if(snap.exists()){var d=snap.val();cache.settings=d.settings||{};cache.projekti=d.projekti||[];cache.klijenti=d.klijenti||[];cache.rashodi=d.rashodi||[];cache.materijal=d.materijal||[]}
 else{cache={settings:{},projekti:[],klijenti:[],rashodi:[],materijal:[]}}
-renderYearTabs();renderDashboard()}).catch(function(e){alert('Load error: '+e.message);console.log('Load error:',e)})
+renderYearTabs();renderDashboard()}).catch(function(e){alert('Load error: '+e.message);console.log('Load error:',e)}})
 
 function saveUserData(){
 if(!currentUser)return;
@@ -414,7 +415,7 @@ async function delItem(t,id){if(!confirm('Obrisati?'))return;cache[t]=cache[t].f
 function exportData(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(cache,null,2)],{type:'application/json'}));a.download='moler-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click()}
 async function importData(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=async function(){try{cache=JSON.parse(r.result);await saveUserData();location.reload()}catch(e){alert('Greška pri importu!')}};r.readAsText(f)}
 
-document.getElementById('modal').addEventListener('click',function(e){if(e.target===e.currentTarget)closeModal()});}
+document.getElementById("modal").addEventListener("click",function(e){if(e.target===e.currentTarget)closeModal()});
 </script>
 </body>
 </html>
