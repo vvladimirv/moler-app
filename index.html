@@ -210,8 +210,11 @@ function initApp() {
   // Auth functions
   function handleLogin(e) {
     e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const pass = document.getElementById('login-pass').value;
+    const emailEl = document.getElementById('login-email');
+    const passEl = document.getElementById('login-pass');
+    if (!emailEl || !passEl) return;
+    const email = emailEl.value;
+    const pass = passEl.value;
     auth.signInWithEmailAndPassword(email, pass).catch(err => alert('Greška: ' + err.message));
   }
 
@@ -227,13 +230,16 @@ function initApp() {
 
   function onAuthStateChanged(user) {
     currentUser = user;
+    const authScreen = document.getElementById('auth-screen');
+    const appScreen = document.getElementById('app-screen');
+    if (!authScreen || !appScreen) return;
     if (user) {
       loadUserData();
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('app-screen').style.display = 'block';
+      authScreen.style.display = 'none';
+      appScreen.style.display = 'block';
     } else {
-      document.getElementById('auth-screen').style.display = 'flex';
-      document.getElementById('app-screen').style.display = 'none';
+      authScreen.style.display = 'flex';
+      appScreen.style.display = 'none';
     }
   }
 
@@ -263,10 +269,12 @@ function initApp() {
   // Navigation
   function navigateTo(page) {
     currentPage = page;
-    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-    document.getElementById('pg-' + page).style.display = 'block';
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.querySelector('.nav-item[onclick="navigateTo('" + page + "')"]').classList.add('active');
+    document.querySelectorAll('.page').forEach(p => { if(p) p.style.display = 'none'; });
+    const targetPage = document.getElementById('pg-' + page);
+    if (targetPage) targetPage.style.display = 'block';
+    document.querySelectorAll('.nav-item').forEach(n => { if(n) n.classList.remove('active'); });
+    const navBtn = document.querySelector('.nav-item[onclick="navigateTo('" + page + "')"]');
+    if (navBtn) navBtn.classList.add('active');
     if (page === 'dashboard') renderDashboard();
     if (page === 'projekti') renderProjekti();
     if (page === 'klijenti') renderKlijenti();
@@ -514,11 +522,19 @@ function initApp() {
   auth.onAuthStateChanged(onAuthStateChanged);
 }
 
-// Wait for Firebase to be ready, then init
+// Wait for DOM and Firebase to be ready
+function startApp() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
+}
+
 if (window.firebase) {
-  initApp();
+  startApp();
 } else {
-  window.addEventListener('load', initApp);
+  window.addEventListener('load', startApp);
 }
 </script>
 </body>
