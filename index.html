@@ -414,7 +414,7 @@ async function delItem(t,id){if(!confirm('Obrisati?'))return;cache[t]=cache[t].f
 function exportData(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(cache,null,2)],{type:'application/json'}));a.download='moler-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click()}
 async function importData(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=async function(){try{cache=JSON.parse(r.result);await saveUserData();location.reload()}catch(e){alert('Greška pri importu!')}};r.readAsText(f)}
 
-document.getElementById('modal').addEventListener('click',function(e){if(e.target===e.currentTarget)closeModal()});
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===e.currentTarget)closeModal()});}
 </script>
 </body>
 </html>
