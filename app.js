@@ -777,7 +777,8 @@ function initApp() {
     html += '</div>';
     html += '<div style="flex: 1;">';
     html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Plafon:</div>';
-    html += '<label id="plafon-label" style="display: flex; align-items: center; gap: 6px; font-size: var(--secondary-font); cursor: pointer; height: 32px; background: ' + (defaultPlafon ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (defaultPlafon ? 'white' : 'var(--text)') + '; padding: 8px 12px; border-radius: 8px; border: 2px solid ' + (defaultPlafon ? 'var(--accent)' : 'var(--border)') + '; transition: all 0.3s ease;"><input type="checkbox" name="plafon" ' + (defaultPlafon ? 'checked' : '') + ' style="margin-right: 4px;"> + Plafon</label>';
+    html += '<input type="checkbox" name="plafon" id="plafon-checkbox" ' + (defaultPlafon ? 'checked' : '') + ' onchange="izracunajUkupno()" style="margin-right: 8px;">';
+    html += '<label for="plafon-checkbox" style="font-size: var(--secondary-font); color: var(--text); cursor: pointer;">+ Plafon</label>';
     html += '</div>';
     html += '<div style="flex: 1;">';
     html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Otvori (m²):</div>';

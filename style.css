@@ -139,6 +139,30 @@ input, select, textarea {
 
 input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.5)}
 
+/* Osiguravanje da nema crnih polja */
+input[type="checkbox"], input[type="radio"], select {
+  background: var(--bg2) !important;
+  border: 2px solid var(--border) !important;
+}
+
+input[type="checkbox"]:checked, input[type="radio"]:checked {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Osiguravanje da nema crnih senki */
+* {
+  box-shadow: none !important;
+}
+
+.stat-card, .modal-content, .form-grid input, .form-grid select, .form-grid textarea {
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.stat-card:hover, .modal-content:hover {
+  box-shadow: var(--shadow) !important;
+}
+
 /* Mobilni chart container */
 @media(max-width:768px) {
   .chart-container {
