@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="MOLER PRO - Softver za upravljanje molerskim poslovima">
+<meta name="author" content="MOLER PRO">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>MOLER PRO</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg width='192' height='192' viewBox='0 0 192 192' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='192' height='192' rx='24' fill='%234f46e5'/%3E%3Ctext x='96' y='96' font-family='Arial' font-size='24' font-weight='bold' text-anchor='middle' fill='white'%3EM%3C/text%3E%3C/svg%3E">
+<script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-screen" id="login-screen">
+<div class="login-box">
+<div class="login-logo">🖌️</div>
+<div class="login-title">MOLER PRO<span>Molarsko poslovanje</span></div>
+<div class="login-tabs">
+<button class="login-tab active" data-tab="login" onclick="showLoginTab('login')">Prijava</button>
+<button class="login-tab" data-tab="register" onclick="showLoginTab('register')">Registracija</button>
+</div>
+<form id="login-form" class="login-form active" onsubmit="handleLogin(event)">
+<label>Email</label><input type="email" id="login-email" required placeholder="vas@email.com">
+<label>Lozinka</label><input type="password" id="login-password" required>
+<button type="submit" class="login-btn">Prijavi se</button>
+<div class="login-error" id="login-error"></div>
+</form>
+<form id="register-form" class="login-form" onsubmit="handleRegister(event)">
+<label>Email</label><input type="email" id="reg-email" required>
+<label>Lozinka</label><input type="password" id="reg-password" required>
+<label>Ponovi lozinku</label><input type="password" id="reg-password2" required>
+<button type="submit" class="login-btn">Registruj se</button>
+<div class="login-error" id="reg-error"></div>
+</form>
+</div>
+</div>
+<div id="main-app">
+<nav class="nav">
+<div class="nav-brand">🖌️ MOLER PRO</div>
+<button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">Dashboard</button>
+<button class="nav-item" data-page="projekti" onclick="showPage('projekti')">Projekti</button>
+<button class="nav-item" data-page="klijenti" onclick="showPage('klijenti')">Klijenti</button>
+<button class="nav-item" data-page="rashodi" onclick="showPage('rashodi')">Rashodi</button>
+<button class="nav-item" data-page="materijal" onclick="showPage('materijal')">Alat & Inventar</button>
+<button class="nav-item" data-page="postavke" onclick="showPage('postavke')">Postavke</button>
+<div class="nav-right">
+<button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌓</button>
+<span class="sync-status offline" id="sync-status">Offline</span>
+<span class="user-info" id="user-display"></span>
+<button class="btn btn-red btn-sm btn-logout" onclick="handleLogout()">Izlaz</button>
+</div>
+</nav>
+<div class="page active" id="pg-dashboard">
+<h2 class="page-title">Dashboard</h2>
+<div class="dashboard-grid">
+<div class="stat-card">
+<div class="stat-value" id="dash-prihodi">0 KM</div>
+<div class="stat-label">Ukupni prihodi</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="dash-rashodi">0 KM</div>
+<div class="stat-label">Ukupni rashodi</div>
+</div>
+<div class="stat-card green">
+<div class="stat-value" id="dash-profit">0 KM</div>
+<div class="stat-label">Profit</div>
+</div>
+<div class="stat-card orange">
+<div class="stat-value" id="dash-placeno">0 KM</div>
+<div class="stat-label">Plaćeno</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="dash-neplaceno">0 KM</div>
+<div class="stat-label">Neplaćeno</div>
+</div>
+<div class="stat-card">
+<div class="stat-value" id="dash-projekata">0</div>
+<div class="stat-label">Projekata</div>
+</div>
+<div class="stat-card green">
+<div class="stat-value" id="dash-zavrseni">0</div>
+<div class="stat-label">Završeni</div>
+</div>
+<div class="stat-card orange">
+<div class="stat-value" id="dash-utijeku">0</div>
+<div class="stat-label">U tijeku</div>
+</div>
+</div>
+
+<div class="table-wrap">
+<h3>📈 Najnovi projekti</h3>
+<div id="recent-projects" style="margin-top: 16px;">
+<p style="color: var(--text2); text-align: center; padding: 20px;">Nema projekata</p>
+</div>
+</div>
+
+<div class="table-wrap">
+<h3>⚠️ Upozorenja</h3>
+<div id="warnings" style="margin-top: 16px;">
+<p style="color: var(--text2); text-align: center; padding: 20px;">Nema upozorenja</p>
+</div>
+</div>
+</div>
+<div class="page" id="pg-projekti">
+<h2 class="page-title">Projekti</h2>
+<div class="search-bar">
+<input type="text" id="proj-search" placeholder="Pretraga..." oninput="renderProjekti()">
+<div class="year-tabs" id="year-tabs"></div>
+</div>
+<button class="btn btn-accent" onclick="openProjektModal()">+ Novi projekt</button>
+<div class="table-wrap">
+<table><thead><tr><th>Datum</th><th>Klijent</th><th>Adresa</th><th>m2</th><th>Cijena</th><th>Status</th><th>Placeno</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-projekti"></tbody></table>
+</div>
+</div>
+<div class="page" id="pg-klijenti">
+<h2 class="page-title">Klijenti</h2>
+<div class="search-bar"><input type="text" id="klijent-search" placeholder="Pretraga..." oninput="renderKlijenti()"></div>
+<button class="btn btn-accent" onclick="openKlijentModal()">+ Novi klijent</button>
+<div class="table-wrap">
+<table><thead><tr><th>Ime</th><th>Telefon</th><th>Adresa</th><th>Projekata</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-klijenti"></tbody></table>
+</div>
+</div>
+<div class="page" id="pg-rashodi">
+<h2 class="page-title">Rashodi</h2>
+<button class="btn btn-accent" onclick="openRashodModal()">+ Novi rashod</button>
+<div class="table-wrap">
+<table><thead><tr><th>Datum</th><th>Kategorije</th><th>Opis</th><th>Iznos</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-rashodi"></tbody></table>
+</div>
+</div>
+<div class="page" id="pg-materijal">
+<h2 class="page-title">Alat & Inventar</h2>
+<p style="color: var(--text2); margin-bottom: 16px;">Praćenje alata i opreme (materijali se kupuju po projektima i unose u rashode)</p>
+<button class="btn btn-accent" onclick="openMaterijalModal()">+ Dodaj alat/opremu</button>
+<div class="table-wrap">
+<table><thead><tr><th>Naziv</th><th>Kategorija</th><th>Količina</th><th>Min. zaliha</th><th>Cijena/jm</th><th>Ukupno</th><th>Status</th><th>Akcije</th></tr></thead>
+<tbody id="tbl-materijal"></tbody></table>
+</div>
+</div>
+<div class="page" id="pg-postavke">
+<h2 class="page-title">Postavke</h2>
+<div class="table-wrap">
+<h3>📊 Podaci i statistika</h3>
+<p style="margin:16px 0;color:var(--text2)">Upravljanje podacima aplikacije</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px;">
+<button class="btn btn-accent" onclick="exportData()">📤 Export JSON</button>
+<input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+<button class="btn btn-outline" onclick="document.getElementById('import-file').click()">📥 Import JSON</button>
+<button class="btn btn-outline" onclick="clearAllData()">🗑️ Obriši sve podatke</button>
+</div>
+
+<h3>🎨 Prikaz i tema</h3>
+<p style="margin:16px 0;color:var(--text2)">Podesite izgled aplikacije</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px;">
+<button class="btn btn-outline" onclick="toggleTheme()">🌓 Promijeni temu</button>
+<button class="btn btn-outline" onclick="resetTheme()">🔄 Resetuj temu</button>
+</div>
+
+<h3> Notifikacije</h3>
+<p style="margin:16px 0;color:var(--text2)">Podsetnici i obavještenja</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px;">
+<label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+<input type="checkbox" id="notif-low-stock" style="width: 18px; height: 18px;">
+<span>Obavijesti pri niskim zalihama</span>
+</label>
+<label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+<input type="checkbox" id="notif-unpaid" style="width: 18px; height: 18px;">
+<span>Obavijesti za neplaćene fakture</span>
+</label>
+</div>
+
+<h3>ℹ️ O aplikaciji</h3>
+<div style="background: var(--bg3); padding: 16px; border-radius: 8px; margin-top: 16px;">
+<p><strong>MOLER PRO</strong> - Verzija 1.0.0</p>
+<p style="color: var(--text2); margin-top: 8px;">Softver za upravljanje molerskim poslovima</p>
+<p style="color: var(--text2); margin-top: 4px;">© 2024 MOLER PRO</p>
+</div>
+</div>
+</div>
+</div>
+<div class="modal" id="modal">
+<div class="modal-content" id="modal-content"></div>
+</div>
+
+
+<script src="app.js"></script>
+</body>
+</html>
