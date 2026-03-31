@@ -665,126 +665,177 @@ function initApp() {
     }).join('');
   }
 
-  function openProjektModal(projektIndex = null) {
-    const projekt = projektIndex !== null ? userData.projekti[projektIndex] : null;
-    const klijentiOpts = userData.klijenti.length > 0 
-      ? userData.klijenti.map(k => '<option value="' + k.id + '" ' + (projekt && projekt.klijentId === k.id ? 'selected' : '') + '>' + k.ime + '</option>').join('')
-      : '<option value="">Nema klijenata</option>';
-    const today = new Date().toISOString().split('T')[0];
-    const postavke = userData.postavke || {};
+  function openProjektModal(index = null) {
+    const projekt = index !== null ? userData.projekti[index] : null;
+    const klijenti = userData.klijenti || [];
     
-    const defaultTip = projekt ? projekt.tipPosla : 'molerski';
-    const defaultCijena = projekt ? projekt.cijenaPoM2 : (postavke.cijenaMolerski || 12);
-    const defaultPlafon = projekt ? projekt.plafon : (postavke.autoPlafon || false);
-    const defaultOtvori = projekt ? projekt.otvoriOdbiti : (postavke.autoOtvori ? (postavke.otvoriDefault || 20) : '');
+    // Detalji klijenta
+    let klijentOptions = '';
+    if (klijenti.length > 0) {
+      klijentOptions = klijenti.map(k => 
+        `<option value="${k.id}">${sanitizeHTML(k.ime)}</option>`
+      ).join('');
+    } else {
+      klijentOptions = '<option value="">Nema klijenata</option>';
+    }
     
-    // Vrste posla - multiple checkbox
-    const vrstePosla = projekt ? (projekt.vrstePosla || []) : [];
+    // Podaci za formu
+    const vrstePosla = projekt ? projekt.vrstePosla : [];
+    const defaultPlafon = projekt ? projekt.plafon : (userData.postavke?.autoPlafon || false);
     
-    let html = '<h3 style="margin: 0 0 10px 0; font-size: 1em;">' + (projekt ? '✏️ Uredi posao' : '➕ Novi posao') + '</h3>';
-    html += '<form onsubmit="saveProjekt(event, ' + projektIndex + ')">';
+    // RED 1: NASLOV I KLIJENT - NAJVAŽNIJE
+    let html = '<h3 style="font-size: var(--primary-font); margin-bottom: 20px; color: var(--accent); font-weight: 700;">' + (projekt ? '✏️ Uredi projekt' : '➕ Novi projekt') + '</h3>';
+    html += '<form onsubmit="saveProjekt(event, ' + index + ')" class="form-grid">';
     
-    // RED 1: KLIJENT
-    html += '<div style="margin-bottom: 8px;">';
-    html += '<select name="klijentId" id="klijent-select" onchange="toggleNewKlijent()" style="width: 100%; padding: 6px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.85em;"><option value="">👤 Izaberite klijenta...</option>' + klijentiOpts + '<option value="new">+ Novi klijent</option></select>';
+    // SEKCIJA 1: KLJENT I DATUM - PRIORITET 1
+    html += '<div style="background: var(--bg3); padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">';
+    html += '<div style="display: flex; gap: 12px; margin-bottom: 12px;">';
+    html += '<div style="flex: 1;">';
+    html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 6px; font-weight: 600;">👤 Klijent:</div>';
+    html += '<select name="klijentId" id="klijent-select" onchange="toggleNewKlijent()" style="width: 100%; padding: 12px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--primary-font);"><option value="">Izaberite klijenta...</option><option value="new">+ Novi klijent</option>' + klijentOptions + '</select>';
+    html += '</div>';
+    html += '<div style="flex: 0 0 120px;">';
+    html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 6px; font-weight: 600;">📅 Datum:</div>';
+    html += '<input type="date" name="datum" value="' + (projekt ? projekt.datum : new Date().toISOString().split('T')[0]) + '" required style="width: 100%; padding: 12px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--primary-font);">';
+    html += '</div>';
     html += '</div>';
     
-    // NOVI KLIJENT (hidden)
-    html += '<div id="new-klijent-fields" style="display: none; margin-bottom: 8px; padding: 8px; background: var(--bg3); border-radius: 4px;">';
-    html += '<input type="text" id="new-klijent-ime" placeholder="Ime i prezime" style="width: 100%; padding: 5px; margin-bottom: 4px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; font-size: 0.8em;">';
-    html += '<div style="display: flex; gap: 6px;">';
-    html += '<input type="tel" id="new-klijent-telefon" placeholder="Telefon" style="flex: 1; padding: 5px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; font-size: 0.8em;">';
-    html += '<input type="text" id="new-klijent-adresa" placeholder="Adresa" style="flex: 1; padding: 5px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; font-size: 0.8em;">';
+    // POLJA ZA NOVOG KLIJENTA - PRIORITET 1
+    html += '<div id="new-klijent-fields" style="display: none; background: var(--bg3); padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">';
+    html += '<div style="display: flex; gap: 12px; margin-bottom: 12px;">';
+    html += '<div style="flex: 1;">';
+    html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 6px; font-weight: 600;">👤 Ime klijenta:</div>';
+    html += '<input type="text" id="new-klijent-ime" placeholder="Unesite ime klijenta..." style="width: 100%; padding: 12px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--primary-font);">';
+    html += '</div>';
+    html += '<div style="flex: 1;">';
+    html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 6px; font-weight: 600;">📞 Telefon:</div>';
+    html += '<input type="text" id="new-klijent-telefon" placeholder="Unesite telefon..." style="width: 100%; padding: 12px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--primary-font);">';
+    html += '</div>';
+    html += '</div>';
+    html += '<div style="display: flex; gap: 12px;">';
+    html += '<div style="flex: 1;">';
+    html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 6px; font-weight: 600;">🏠 Adresa:</div>';
+    html += '<input type="text" id="new-klijent-adresa" placeholder="Unesite adresu..." style="width: 100%; padding: 12px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--primary-font);">';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    
+    // SEKCIJA 2: VRSTE POSLA - PRIORITET 1
+    html += '<div style="background: var(--bg3); padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">';
+    html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 12px; font-weight: 600;">🔧 Vrste posla:</div>';
+    html += '<div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">';
+    const vrste = ['krecenje', 'gletovanje', 'lajsne', 'kitovanje', 'brusenje', 'grunt', 'fasada', 'gips'];
+    const labels = {krecenje: '🎨 Krečenje', gletovanje: '🔧 Gletovanje', lajsne: '📐 Lajsne', kitovanje: '🪣 Kitovanje', brusenje: '⚡ Brušenje', grunt: '🧱 Grunt', fasada: '🏠 Fasada', gips: '📋 Gips'};
+    vrste.forEach(vrsta => {
+      const checked = vrstePosla.includes(vrsta) ? 'checked' : '';
+      html += '<label style="display: flex; align-items: center; gap: 6px; font-size: var(--secondary-font); cursor: pointer; background: ' + (vrstePosla.includes(vrsta) ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (vrstePosla.includes(vrsta) ? 'white' : 'var(--text)') + '; padding: 8px 12px; border-radius: 8px; border: 2px solid ' + (vrstePosla.includes(vrsta) ? 'var(--accent)' : 'var(--border)') + '; transition: all 0.3s ease;"><input type="checkbox" name="vp_' + vrsta + '" ' + checked + ' onchange="izracunajCijenuPoVrstama()" style="margin-right: 4px;"> ' + labels[vrsta] + '</label>';
+    });
     html += '</div></div>';
     
-    // RED 2: DATUM | ADRESA | STATUS
-    html += '<div style="display: flex; gap: 6px; margin-bottom: 8px;">';
-    html += '<input type="date" name="datum" value="' + (projekt ? projekt.datum : today) + '" required style="flex: 1; padding: 6px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.8em;">';
-    html += '<input type="text" name="adresa" value="' + (projekt ? projekt.adresa || '' : '') + '" placeholder="📍 Adresa" style="flex: 2; padding: 6px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.8em;">';
-    html += '<select name="status" style="flex: 1; padding: 6px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.8em;">';
-    html += '<option value="dogovoren" ' + (projekt && projekt.status === 'dogovoren' ? 'selected' : '') + '>Dogovoren</option>';
-    html += '<option value="u_tijeku" ' + (projekt && projekt.status === 'u_tijeku' ? 'selected' : '') + '>U tijeku</option>';
-    html += '<option value="zavrsen" ' + (projekt && projekt.status === 'zavrsen' ? 'selected' : '') + '>Završen</option>';
-    html += '</select>';
-    html += '</div>';
+    // SEKCIJA 3: LOKACIJA I TIP - SAMO ZA NOVOG KLIJENTA
+    // Provjeri da li je odabran novi klijent
+    const isNewKlijent = klijentOptions === '' || projekt?.klijentId === 'new';
     
-    // RED 3: VRSTE POSLA - 4 u redu
-    const vp = projekt ? (projekt.vrstePosla || []) : [];
-    html += '<div style="margin-bottom: 8px;">';
-    html += '<div style="font-size: 10px; color: var(--text2); margin-bottom: 3px;">Vrste posla:</div>';
-    html += '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px;">';
-    html += '<label style="display: flex; align-items: center; gap: 3px; font-size: 0.8em; cursor: pointer; background: ' + (vp.includes('krecenje') ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (vp.includes('krecenje') ? 'white' : 'var(--text)') + '; padding: 4px 6px; border-radius: 3px;"><input type="checkbox" name="vp_krecenje" ' + (vp.includes('krecenje')?'checked':'') + ' onchange="izracunajCijenuPoVrstama()"> Krečenje</label>';
-    html += '<label style="display: flex; align-items: center; gap: 3px; font-size: 0.8em; cursor: pointer; background: ' + (vp.includes('gletovanje') ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (vp.includes('gletovanje') ? 'white' : 'var(--text)') + '; padding: 4px 6px; border-radius: 3px;"><input type="checkbox" name="vp_gletovanje" ' + (vp.includes('gletovanje')?'checked':'') + ' onchange="izracunajCijenuPoVrstama()"> Gletovanje</label>';
-    html += '<label style="display: flex; align-items: center; gap: 3px; font-size: 0.8em; cursor: pointer; background: ' + (vp.includes('lajsne') ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (vp.includes('lajsne') ? 'white' : 'var(--text)') + '; padding: 4px 6px; border-radius: 3px;"><input type="checkbox" name="vp_lajsne" ' + (vp.includes('lajsne')?'checked':'') + ' onchange="izracunajCijenuPoVrstama()"> Lajsne</label>';
-    html += '<label style="display: flex; align-items: center; gap: 3px; font-size: 0.8em; cursor: pointer; background: ' + (vp.includes('kitovanje') ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (vp.includes('kitovanje') ? 'white' : 'var(--text)') + '; padding: 4px 6px; border-radius: 3px;"><input type="checkbox" name="vp_kitovanje" ' + (vp.includes('kitovanje')?'checked':'') + ' onchange="izracunajCijenuPoVrstama()"> Kitovanje</label>';
-    html += '<label style="display: flex; align-items: center; gap: 3px; font-size: 0.8em; cursor: pointer; background: ' + (vp.includes('brusenje') ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (vp.includes('brusenje') ? 'white' : 'var(--text)') + '; padding: 4px 6px; border-radius: 3px;"><input type="checkbox" name="vp_brusenje" ' + (vp.includes('brusenje')?'checked':'') + ' onchange="izracunajCijenuPoVrstama()"> Brušenje</label>';
-    html += '<label style="display: flex; align-items: center; gap: 3px; font-size: 0.8em; cursor: pointer; background: ' + (vp.includes('grunt') ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (vp.includes('grunt') ? 'white' : 'var(--text)') + '; padding: 4px 6px; border-radius: 3px;"><input type="checkbox" name="vp_grunt" ' + (vp.includes('grunt')?'checked':'') + ' onchange="izracunajCijenuPoVrstama()"> Grunt</label>';
-    html += '<label style="display: flex; align-items: center; gap: 3px; font-size: 0.8em; cursor: pointer; background: ' + (vp.includes('fasada') ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (vp.includes('fasada') ? 'white' : 'var(--text)') + '; padding: 4px 6px; border-radius: 3px;"><input type="checkbox" name="vp_fasada" ' + (vp.includes('fasada')?'checked':'') + ' onchange="izracunajCijenuPoVrstama()"> Fasada</label>';
-    html += '<label style="display: flex; align-items: center; gap: 3px; font-size: 0.8em; cursor: pointer; background: ' + (vp.includes('gips') ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (vp.includes('gips') ? 'white' : 'var(--text)') + '; padding: 4px 6px; border-radius: 3px;"><input type="checkbox" name="vp_gips" ' + (vp.includes('gips')?'checked':'') + ' onchange="izracunajCijenuPoVrstama()"> Gips</label>';
+    if (isNewKlijent) {
+      html += '<div style="display: flex; gap: 16px; margin-bottom: 16px;">';
+      html += '<div style="flex: 2;">';
+      html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 6px; font-weight: 600;">📍 Adresa:</div>';
+      html += '<input type="text" name="adresa" value="' + (projekt ? projekt.adresa || '' : '') + '" placeholder="Ulica i broj, grad..." style="width: 100%; padding: 12px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--primary-font);">';
+      html += '</div>';
+      html += '<div style="flex: 1;">';
+      html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 6px; font-weight: 600;">🏷️ Tip posla:</div>';
+      html += '<select name="tipPosla" onchange="updateCijenaPoTipu()" style="width: 100%; padding: 12px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--primary-font);"><option value="molerski" ' + ((projekt?.tipPosla || 'molerski') === 'molerski' ? 'selected' : '') + '>🎨 Molerski</option><option value="fasaderski" ' + ((projekt?.tipPosla || 'molerski') === 'fasaderski' ? 'selected' : '') + '>🏠 Fasaderski</option></select>';
+      html += '</div>';
+      html += '</div>';
+    }
+    
+    // SEKCIJA 4: DIMENZIJE - PRIORITET 2
+    html += '<div style="background: var(--bg3); padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">';
+    html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 12px; font-weight: 600;">📐 Dimenzije prostorije:</div>';
+    html += '<div style="display: flex; gap: 12px; margin-bottom: 8px;">';
+    html += '<div style="flex: 1;">';
+    html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Dužina (m):</div>';
+    html += '<input type="number" name="duzina" value="' + (projekt ? projekt.duzina || '' : '') + '" placeholder="7.0" step="0.1" oninput="izracunajPovrsine()" style="width: 100%; padding: 10px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--secondary-font);">';
+    html += '</div>';
+    html += '<div style="flex: 1;">';
+    html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Širina (m):</div>';
+    html += '<input type="number" name="sirina" value="' + (projekt ? projekt.sirina || '' : '') + '" placeholder="7.0" step="0.1" oninput="izracunajPovrsine()" style="width: 100%; padding: 10px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--secondary-font);">';
+    html += '</div>';
+    html += '<div style="flex: 1;">';
+    html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Kvadratura poda:</div>';
+    html += '<input type="number" name="kvadraturaStana" value="' + (projekt ? projekt.kvadraturaStana || projekt.m2 : '') + '" placeholder="49" step="0.1" oninput="izracunajPovrsine()" style="width: 100%; padding: 10px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--secondary-font);">';
+    html += '</div>';
     html += '</div></div>';
     
-    // RED 4: DIMENZIJE PROSTORIJE
-    html += '<div style="display: flex; gap: 6px; margin-bottom: 8px;">';
+    // SEKCIJA 5: POVRSINE - PRIORITET 2
+    html += '<div style="background: var(--bg3); padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">';
+    html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 12px; font-weight: 600;">📏 Površine za rad:</div>';
+    html += '<div style="display: flex; gap: 12px; margin-bottom: 8px;">';
     html += '<div style="flex: 1;">';
-    html += '<div style="font-size: 10px; color: var(--text2); margin-bottom: 2px;">Dužina (m):</div>';
-    html += '<input type="number" name="duzina" value="' + (projekt ? projekt.duzina || '' : '') + '" placeholder="7.0" step="0.1" oninput="izracunajPovrsine()" style="width: 100%; padding: 5px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.8em;">';
+    html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Površina zidova:</div>';
+    html += '<input type="number" name="m2zidovi" value="' + (projekt ? projekt.m2zidovi || '' : '') + '" placeholder="72.8" step="0.1" oninput="izracunajUkupno()" style="width: 100%; padding: 10px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--secondary-font);">';
     html += '</div>';
     html += '<div style="flex: 1;">';
-    html += '<div style="font-size: 10px; color: var(--text2); margin-bottom: 2px;">Širina (m):</div>';
-    html += '<input type="number" name="sirina" value="' + (projekt ? projekt.sirina || '' : '') + '" placeholder="7.0" step="0.1" oninput="izracunajPovrsine()" style="width: 100%; padding: 5px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.8em;">';
+    html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Plafon:</div>';
+    html += '<label id="plafon-label" style="display: flex; align-items: center; gap: 6px; font-size: var(--secondary-font); cursor: pointer; height: 32px; background: ' + (defaultPlafon ? 'var(--accent)' : 'var(--bg2)') + '; color: ' + (defaultPlafon ? 'white' : 'var(--text)') + '; padding: 8px 12px; border-radius: 8px; border: 2px solid ' + (defaultPlafon ? 'var(--accent)' : 'var(--border)') + '; transition: all 0.3s ease;"><input type="checkbox" name="plafon" ' + (defaultPlafon ? 'checked' : '') + ' style="margin-right: 4px;"> + Plafon</label>';
     html += '</div>';
     html += '<div style="flex: 1;">';
-    html += '<div style="font-size: 10px; color: var(--text2); margin-bottom: 2px;">Kvadratura poda:</div>';
-    html += '<input type="number" name="kvadraturaStana" value="' + (projekt ? projekt.kvadraturaStana || projekt.m2 : '') + '" placeholder="49" step="0.1" oninput="izracunajPovrsine()" style="width: 100%; padding: 5px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.8em;">';
+    html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Otvori (m²):</div>';
+    html += '<input type="number" name="otvoriOdbiti" value="' + (projekt ? projekt.otvoriOdbiti || 0 : 0) + '" placeholder="0" step="0.1" oninput="izracunajPovrsine()" style="width: 100%; padding: 10px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--secondary-font);">';
     html += '</div>';
+    html += '</div></div>';
+    
+    // SEKCIJA 6: CIJENA I TROŠKOVI - PRIORITET 1
+    html += '<div style="background: var(--bg3); padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">';
+    html += '<div style="font-size: var(--primary-font); color: var(--text); margin-bottom: 12px; font-weight: 600;">💰 Cijena i troškovi:</div>';
+    html += '<div style="display: flex; gap: 12px; margin-bottom: 8px; align-items: flex-end;">';
+    html += '<div style="flex: 1;">';
+    html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Cijena/m²:</div>';
+    html += '<input type="number" name="cijenaPoM2" id="cijena-po-m2" value="' + (projekt ? projekt.cijenaPoM2 : '12') + '" step="0.01" oninput="izracunajUkupno()" style="width: 100%; padding: 10px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--secondary-font);">';
+    html += '</div>';
+    html += '<div style="flex: 1;">';
+    html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Troškovi:</div>';
+    html += '<input type="number" name="troskoviMaterijali" value="' + (projekt ? projekt.troskoviMaterijali : 0) + '" step="0.01" oninput="izracunajUkupno()" style="width: 100%; padding: 10px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--secondary-font);">';
+    html += '</div>';
+    html += '<div style="flex: 1; background: var(--accent); padding: 12px; border-radius: 8px; color: white; text-align: center; border: 2px solid var(--accent);">';
+    html += '<div style="font-size: var(--secondary-font); opacity: 0.9; margin-bottom: 4px;">UKUPNO</div>';
+    html += '<div style="font-size: var(--primary-font); font-weight: 600;"><span id="cijena-total">0</span> KM</div>';
+    html += '<div style="font-size: var(--meta-font); opacity: 0.8;" id="povrsina-total">0 m²</div>';
+    html += '</div>';
+    html += '</div></div>';
+    
+    // SEKCIJA 7: NAPOMENA - NAJMANJI PRIORITET
+    html += '<div style="background: var(--bg3); padding: 12px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">';
+    html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 6px; font-weight: 500;">📝 Napomena:</div>';
+    html += '<input type="text" name="napomena" value="' + (projekt ? projekt.napomena || '' : '') + '" placeholder="Dodatne informacije o projektu..." style="width: 100%; padding: 10px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--secondary-font);">';
     html += '</div>';
     
-    // RED 5: POVRSINE -_zidovi, plafon
-    html += '<div style="display: flex; gap: 6px; margin-bottom: 8px;">';
-    html += '<div style="flex: 1;">';
-    html += '<div style="font-size: 10px; color: var(--text2); margin-bottom: 2px;">Površina zidova:</div>';
-    html += '<input type="number" name="m2zidovi" value="' + (projekt ? projekt.m2zidovi || '' : '') + '" placeholder="72.8" step="0.1" oninput="izracunajUkupno()" style="width: 100%; padding: 5px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.8em;">';
-    html += '</div>';
-    html += '<div style="flex: 1;">';
-    html += '<div style="font-size: 10px; color: var(--text2); margin-bottom: 2px;">Plafon:</div>';
-    html += '<label style="display: flex; align-items: center; gap: 3px; font-size: 0.8em; cursor: pointer; height: 28px; background: ' + (defaultPlafon ? 'var(--accent)' : 'white') + '; color: ' + (defaultPlafon ? 'white' : '#333') + '; padding: 4px 8px; border-radius: 4px; border: 1px solid ' + (defaultPlafon ? 'var(--accent)' : '#ddd') + ';"><input type="checkbox" name="plafon" ' + (defaultPlafon ? 'checked' : '') + ' onchange="izracunajUkupno(); this.parentElement.style.background=this.checked?\'var(--accent)\':\'white\'; this.parentElement.style.color=this.checked?\'white\':\'#333\'; this.parentElement.style.borderColor=this.checked?\'var(--accent)\':\'#ddd\';"> + Plafon</label>';
-    html += '</div>';
-    html += '<div style="flex: 1;">';
-    html += '<div style="font-size: 10px; color: var(--text2); margin-bottom: 2px;">Otvori (m²):</div>';
-    html += '<input type="number" name="otvoriOdbiti" value="' + (projekt ? projekt.otvoriOdbiti || 0 : 0) + '" placeholder="0" step="0.1" oninput="izracunajPovrsine()" style="width: 100%; padding: 5px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.8em;">';
-    html += '</div>';
-    html += '</div>';
-    
-    // RED 5: CIJENA | TROŠKOVI | UKUPNO
-    html += '<div style="display: flex; gap: 6px; margin-bottom: 8px; align-items: flex-end;">';
-    html += '<div style="flex: 1;">';
-    html += '<div style="font-size: 10px; color: var(--text2); margin-bottom: 2px;">Cijena/m²:</div>';
-    html += '<input type="number" name="cijenaPoM2" id="cijena-po-m2" value="' + (projekt ? projekt.cijenaPoM2 : '12') + '" step="0.01" oninput="izracunajUkupno()" style="width: 100%; padding: 5px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.8em;">';
-    html += '</div>';
-    html += '<div style="flex: 1;">';
-    html += '<div style="font-size: 10px; color: var(--text2); margin-bottom: 2px;">Troškovi:</div>';
-    html += '<input type="number" name="troskoviMaterijali" value="' + (projekt ? projekt.troskoviMaterijali : 0) + '" step="0.01" oninput="izracunajUkupno()" style="width: 100%; padding: 5px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.8em;">';
-    html += '</div>';
-    html += '<div style="flex: 1; background: var(--accent); padding: 5px; border-radius: 4px; color: white; text-align: center;">';
-    html += '<div style="font-size: 9px; opacity: 0.9;">UKUPNO</div>';
-    html += '<div style="font-size: 1em; font-weight: 600;"><span id="cijena-total">0</span> KM</div>';
-    html += '<div style="font-size: 8px; opacity: 0.8;" id="povrsina-total">0 m²</div>';
-    html += '</div>';
-    html += '</div>';
-    
-    // RED 6: NAPOMENA
-    html += '<div style="margin-bottom: 10px;">';
-    html += '<input type="text" name="napomena" value="' + (projekt ? projekt.napomena || '' : '') + '" placeholder="📝 Napomena..." style="width: 100%; padding: 6px; background: var(--bg2); border: 1px solid #555; border-radius: 4px; color: var(--text); font-size: 0.85em;">';
-    html += '</div>';
-    
-    // RED 6: DUGMADI
-    html += '<div style="display: flex; gap: 8px; justify-content: flex-end;">';
-    html += '<button type="button" onclick="closeModal()" style="padding: 6px 14px; background: transparent; border: 1px solid var(--border); border-radius: 4px; color: var(--text); cursor: pointer; font-size: 0.85em;">Otkaži</button>';
-    html += '<button type="submit" style="padding: 6px 14px; background: var(--accent); border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 0.85em;">' + (projekt ? 'Sačuvaj' : 'Kreiraj') + '</button>';
+    // SEKCIJA 8: DUGMADI - PRIORITET 1
+    html += '<div style="display: flex; gap: 12px; justify-content: flex-end;">';
+    html += '<button type="button" onclick="closeModal()" style="padding: 12px 24px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; font-size: var(--secondary-font); font-weight: 500; transition: all 0.3s ease;">❌ Otkaži</button>';
+    html += '<button type="submit" style="padding: 12px 24px; background: var(--accent); border: none; border-radius: 8px; color: white; cursor: pointer; font-size: var(--primary-font); font-weight: 600; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); transition: all 0.3s ease;">✅ ' + (projekt ? 'Sačuvaj' : 'Kreiraj') + '</button>';
     html += '</div></form>';
     
     document.getElementById('modal-content').innerHTML = html;
     document.getElementById('modal').style.display = 'flex';
+    
+    // Dodaj event listener za plafon checkbox
+    const plafonCheckbox = document.querySelector('input[name="plafon"]');
+    const plafonLabel = document.getElementById('plafon-label');
+    
+    if (plafonCheckbox && plafonLabel) {
+      plafonCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          plafonLabel.style.background = 'var(--accent)';
+          plafonLabel.style.color = 'white';
+          plafonLabel.style.borderColor = 'var(--accent)';
+        } else {
+          plafonLabel.style.background = 'var(--bg2)';
+          plafonLabel.style.color = 'var(--text)';
+          plafonLabel.style.borderColor = 'var(--border)';
+        }
+      });
+    }
     
     if (projekt) {
       setTimeout(() => izracunajUkupno(), 50);
@@ -912,10 +963,9 @@ function initApp() {
   function saveProjekt(e, index) {
     e.preventDefault();
     const f = e.target;
-    let klijentId = f.klijentId.value;
     
     // Ako je odabran novi klijent, kreiraj ga prvo
-    if (klijentId === 'new') {
+    if (f.klijentId.value === 'new') {
       const ime = document.getElementById('new-klijent-ime').value.trim();
       const telefon = document.getElementById('new-klijent-telefon').value.trim();
       const adresa = document.getElementById('new-klijent-adresa').value.trim();
@@ -961,6 +1011,54 @@ function initApp() {
       if (checkbox && checkbox.checked) {
         vrstePosla.push(vrsta);
       }
+    }
+    
+    // Rukovanje novog klijenta
+    if (klijentId === 'new') {
+      const ime = document.getElementById('new-klijent-ime')?.value?.trim() || '';
+      const telefon = document.getElementById('new-klijent-telefon')?.value?.trim() || '';
+      const adresa = document.getElementById('new-klijent-adresa')?.value?.trim() || '';
+      
+      if (!ime) {
+        showToast('Unesite ime novog klijenta!', 'error');
+        return;
+      }
+      
+      // Kreiraj novog klijenta
+      const noviKlijent = {
+        id: Date.now().toString(),
+        ime: ime,
+        telefon: telefon,
+        adresa: adresa
+      };
+      
+      userData.klijenti.push(noviKlijent);
+      klijentId = noviKlijent.id;
+      
+      // Očisti polja za novog klijenta
+      document.getElementById('new-klijent-ime').value = '';
+      document.getElementById('new-klijent-telefon').value = '';
+      document.getElementById('new-klijent-adresa').value = '';
+      document.getElementById('new-klijent-fields').style.display = 'none';
+      
+      // Ažuriraj dropdown sa novim klijentom
+      const select = document.getElementById('klijent-select');
+      if (select) {
+        // Ukloni postojeće opcije osim "+ Novi klijent"
+        while (select.options.length > 1) {
+          select.remove(1);
+        }
+        
+        // Dodaj novog klijenta kao prvu opciju nakon "+ Novi klijent"
+        const novaOpcija = new Option(sanitizeHTML(noviKlijent.ime), noviKlijent.id);
+        select.add(novaOpcija, 1);
+        select.value = noviKlijent.id;
+        
+        // Sakrij polja za novog klijenta
+        document.getElementById('new-klijent-fields').style.display = 'none';
+      }
+      
+      showToast('Novi klijent kreiran!', 'success');
     }
     
     const projekt = {
@@ -1025,6 +1123,21 @@ function initApp() {
       renderProjekti(); 
     } 
   }
+  function toggleNewKlijent() {
+    const select = document.getElementById('klijent-select');
+    const newFields = document.getElementById('new-klijent-fields');
+    const imeInput = document.getElementById('new-klijent-ime');
+    
+    if (select && newFields) {
+      if (select.value === 'new') {
+        newFields.style.display = 'block';
+        if (imeInput) imeInput.focus();
+      } else {
+        newFields.style.display = 'none';
+      }
+    }
+  }
+
   function togglePaid(index) { 
     if (index >= 0 && index < userData.projekti.length) {
       userData.projekti[index].placeno = !userData.projekti[index].placeno; 
@@ -1072,10 +1185,10 @@ function initApp() {
         
         const ukupnaPovrsinaZidova = obim * visinaZidova;
         m2zidoviInput.value = Math.max(0, ukupnaPovrsinaZidova - otvori).toFixed(1);
+        
+        // Pozovi izračun cijene
+        izracunajUkupno();
       }
-      
-      // Pozovi izračun cijene
-      izracunajUkupno();
     }
   }
 
@@ -1449,6 +1562,76 @@ function initApp() {
     if (modal) modal.style.display = 'none'; 
   }
 
+  // KALKULATOR - brzi izračun
+  function openKalkulator() {
+    const html = `
+      <h3 style="margin: 0 0 20px 0; color: var(--accent);">🧮 KALKULATOR</h3>
+      <div style="background: var(--bg2); padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text2);">Površina (m²)</label>
+            <input type="number" id="kalk-povrsina" placeholder="100" step="0.1" style="width: 100%; padding: 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text);">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text2);">Cijena (KM/m²)</label>
+            <input type="number" id="kalk-cijena" placeholder="12" step="0.01" style="width: 100%; padding: 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text);">
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text2);">Materijali (KM)</label>
+            <input type="number" id="kalk-materijali" placeholder="200" step="0.01" style="width: 100%; padding: 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text);">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: var(--text2);">Prevoz (KM)</label>
+            <input type="number" id="kalk-prevoz" placeholder="50" step="0.01" style="width: 100%; padding: 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text);">
+          </div>
+        </div>
+        
+        <div style="background: var(--bg3); padding: 15px; border-radius: 8px; margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span style="font-size: 1.1em; font-weight: 600;">UKUPNO:</span>
+            <span id="kalk-ukupno" style="font-size: 1.3em; font-weight: 700; color: var(--accent);">0.00 KM</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 0.9em; color: var(--text2);">Profit:</span>
+            <span id="kalk-profit" style="font-size: 1.1em; font-weight: 600; color: var(--green);">0.00 KM</span>
+          </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+          <button onclick="closeModal()" style="padding: 10px 20px; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Zatvori</button>
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('modal-content').innerHTML = html;
+    document.getElementById('modal').style.display = 'flex';
+    
+    // Dodaj event listenere za automatski izračun
+    document.getElementById('kalk-povrsina')?.addEventListener('input', izracunajKalkulator);
+    document.getElementById('kalk-cijena')?.addEventListener('input', izracunajKalkulator);
+    document.getElementById('kalk-materijali')?.addEventListener('input', izracunajKalkulator);
+    document.getElementById('kalk-prevoz')?.addEventListener('input', izracunajKalkulator);
+    
+    // Inicijalni izračun
+    izracunajKalkulator();
+  }
+  
+  function izracunajKalkulator() {
+    const povrsina = parseFloat(document.getElementById('kalk-povrsina')?.value) || 0;
+    const cijena = parseFloat(document.getElementById('kalk-cijena')?.value) || 0;
+    const materijali = parseFloat(document.getElementById('kalk-materijali')?.value) || 0;
+    const prevoz = parseFloat(document.getElementById('kalk-prevoz')?.value) || 0;
+    
+    const ukupno = povrsina * cijena;
+    const profit = ukupno - materijali - prevoz;
+    
+    document.getElementById('kalk-ukupno').textContent = ukupno.toFixed(2) + ' KM';
+    document.getElementById('kalk-profit').textContent = profit.toFixed(2) + ' KM';
+  }
+
   function exportData() {
     const data = JSON.stringify(userData, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
@@ -1570,6 +1753,7 @@ function initApp() {
   window.editMaterijal = editMaterijal;
   window.deleteMaterijal = deleteMaterijal;
   window.closeModal = closeModal;
+  window.openKalkulator = openKalkulator;
   window.exportData = exportData;
   window.importData = importData;
   window.clearAllData = clearAllData;
@@ -1613,11 +1797,11 @@ function initApp() {
 function startApp() {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);
+    
   } else {
     initApp();
   }
 }
-
 if (window.firebase) {
   startApp();
 } else {
