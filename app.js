@@ -755,7 +755,7 @@ function initApp() {
     html += '<div style="display: flex; gap: 12px; margin-bottom: 8px;">';
     html += '<div style="flex: 1;">';
     html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Dužina (m):</div>';
-    html += '<input type="number" name="duzina" value="' + (projekt ? projekt.duzina || '' : '') + '" placeholder="7.0" step="0.1" oninput="izracunajPovrsine()" style="width: 100%; padding: 10px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--secondary-font);">';
+    html += '<input type="number" name="duzina" value="' + (projekt ? projekt.duzina || '' : '') + '" placeholder="7.0" step="0.1" oninput="izracunajPovrsine(); izracunajUkupno()" style="width: 100%; padding: 10px; background: var(--bg2); border: 2px solid var(--border); border-radius: 8px; color: var(--text); font-size: var(--secondary-font);">';
     html += '</div>';
     html += '<div style="flex: 1;">';
     html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Širina (m):</div>';
@@ -777,7 +777,7 @@ function initApp() {
     html += '</div>';
     html += '<div style="flex: 1;">';
     html += '<div style="font-size: var(--secondary-font); color: var(--text2); margin-bottom: 4px;">Plafon:</div>';
-    html += '<input type="checkbox" name="plafon" id="plafon-checkbox" ' + (defaultPlafon ? 'checked' : '') + ' onchange="izracunajUkupno()" style="margin-right: 8px;">';
+    html += '<input type="checkbox" name="plafon" id="plafon-checkbox" ' + (defaultPlafon ? 'checked' : '') + ' onchange="izracunajPovrsine(); izracunajUkupno()" style="margin-right: 8px;">';
     html += '<label for="plafon-checkbox" style="font-size: var(--secondary-font); color: var(--text); cursor: pointer;">+ Plafon</label>';
     html += '</div>';
     html += '<div style="flex: 1;">';
